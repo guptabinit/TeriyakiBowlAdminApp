@@ -1,0 +1,82 @@
+{
+  "project_info": {
+    "project_number": "247486566264",
+    "project_id": "teriyaki-bowl-app",
+    "storage_bucket": "teriyaki-bowl-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:247486566264:android:51e8ad5a1021861406028d",
+        "android_client_info": {
+          "package_name": "com.teriyakibowl.teriyaki_bowl_admin_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "247486566264-uivbo8q7u6rprri29omadjekae8j01d4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyATZttomkPUhVD1gsS2mMLdMs5t_HW2Vns"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "247486566264-uivbo8q7u6rprri29omadjekae8j01d4.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "247486566264-d4flos609e08pbqkdo7h65mtpcl66e9h.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.teriyakibowl.teriyakiBowlApp"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:247486566264:android:912333babadc96d906028d",
+        "android_client_info": {
+          "package_name": "com.tkbowl.teriyaki_bowl_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "247486566264-uivbo8q7u6rprri29omadjekae8j01d4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyATZttomkPUhVD1gsS2mMLdMs5t_HW2Vns"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "247486566264-uivbo8q7u6rprri29omadjekae8j01d4.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "247486566264-d4flos609e08pbqkdo7h65mtpcl66e9h.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.teriyakibowl.teriyakiBowlApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
