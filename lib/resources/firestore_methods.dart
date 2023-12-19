@@ -18,7 +18,6 @@ class FirestoreMethods {
     required context,
   }) async {
     try {
-
       String photoUrl = await StorageMethods().uploadImageToStorage(file!, promotionID);
 
       await _firestore.collection('commons').doc('promotions').set({
@@ -46,8 +45,7 @@ class FirestoreMethods {
     required context,
   }) async {
     try {
-
-      if(imagePresent) {
+      if (imagePresent) {
         String photoUrl = await StorageMethods().uploadImageToStorage(file!, promotionID);
 
         await _firestore.collection('commons').doc('promotions').update({
@@ -159,29 +157,42 @@ class FirestoreMethods {
 
   // UPDATE ORDER
 
-  Future<void> updateOrder({
+  Future<String> updateOrder({
     required String oid,
     required int orderStatus,
     required bool paymentCompleted,
     required String uid,
-    required context,
   }) async {
+    String res = "some error occurred";
     try {
       await _firestore.collection('allOrders').doc(oid).update({
         'order_status': orderStatus,
         'payment_completed': paymentCompleted,
       });
-      await _firestore.collection('orders').doc(uid).update({
-        oid: (
-          {
-            'order_status': orderStatus,
-            'payment_completed': paymentCompleted,
-          },
-          SetOptions(merge: true)
-        )
-      });
+
+      res = "success";
     } catch (e) {
-      showSnackBar(e.toString(), context);
+      res = e.toString();
     }
+    return res;
   }
+  // UPDATE Read ORDER
+
+  Future<String> updateReadOrder({
+    required String oid,
+  }) async {
+    String res = "some error occurred";
+    try {
+      await _firestore.collection('allOrders').doc(oid).update({
+        'read': true,
+      });
+
+      res = "success";
+    } catch (e) {
+      res = e.toString();
+    }
+    return res;
+  }
+
+
 }

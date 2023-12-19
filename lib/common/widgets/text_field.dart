@@ -26,7 +26,8 @@ class CustomTextField extends StatefulWidget {
     this.keyboardType = TextInputType.text,
     this.isDisabled = false,
     this.fontWeight = FontWeight.normal,
-    this.maxLength
+    this.maxLength,
+    Function()? onEditingCompleted,
   });
 
   @override
