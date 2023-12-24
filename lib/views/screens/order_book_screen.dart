@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -49,13 +48,14 @@ class _OrderBookScreenState extends State<OrderBookScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
             child: IconButton(
               onPressed: () {
-                Get.to(()=> const SearchOrderScreen());
+                Get.to(() => const SearchOrderScreen());
               },
               icon: const Icon(
                 Icons.search,
                 size: 28,
                 color: lightColor,
-              ),),
+              ),
+            ),
           ),
         ],
       ),
@@ -63,12 +63,16 @@ class _OrderBookScreenState extends State<OrderBookScreen> {
         children: [
           Expanded(
             child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(decelerationRate: ScrollDecelerationRate.fast),
+              physics: const BouncingScrollPhysics(
+                  decelerationRate: ScrollDecelerationRate.fast),
               child: StreamBuilder(
                 stream: FirebaseFirestore.instance
-                    .collection('allOrders').orderBy('oid', descending: true)
+                    .collection('allOrders')
+                    .orderBy('oid', descending: true)
                     .snapshots(),
-                builder: (context, AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
+                builder: (context,
+                    AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>>
+                        snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(
                       child: CircularProgressIndicator(
@@ -79,23 +83,27 @@ class _OrderBookScreenState extends State<OrderBookScreen> {
 
                   var listLength = snapshot.data!.docs.length;
 
-                  return listLength == 0 ? Center(child: "No Existing Order".text.bold.make(),) : ListView.builder(
-                    shrinkWrap: true,
-                    padding: const EdgeInsets.all(12),
-                    itemCount: snapshot.data!.docs.length,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemBuilder: (BuildContext context, index) {
-                      var snap = snapshot.data!.docs[index];
+                  return listLength == 0
+                      ? Center(
+                          child: "No Existing Order".text.bold.make(),
+                        )
+                      : ListView.builder(
+                          shrinkWrap: true,
+                          padding: const EdgeInsets.all(12),
+                          itemCount: snapshot.data!.docs.length,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemBuilder: (BuildContext context, index) {
+                            var snap = snapshot.data!.docs[index];
 
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          OrderTile(snap: snap),
-                          12.heightBox,
-                        ],
-                      );
-                    },
-                  );
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                OrderTile(snap: snap),
+                                12.heightBox,
+                              ],
+                            );
+                          },
+                        );
                 },
               ),
             ),

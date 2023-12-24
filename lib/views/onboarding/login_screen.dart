@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -32,7 +33,6 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void loginUser() async {
-
     setState(() {
       _isLoading = true;
     });
@@ -46,8 +46,21 @@ class _LoginScreenState extends State<LoginScreen> {
         if (passwordController.text.length >= 6) {
           if (emailController.text == widget.adminData['email'] &&
               passwordController.text == widget.adminData['password']) {
-
             sharedPref.setBool(SplashScreenState.KEYLOGIN, true);
+
+            final token = await FirebaseMessaging.instance.getToken();
+
+            await FirebaseFirestore.instance
+                .collection('commons')
+                .doc('fcm')
+                .set(
+              {
+                'tokens': FieldValue.arrayUnion(
+                  [token],
+                ),
+              },
+              SetOptions(merge: true),
+            );
 
             setState(() {
               _isLoading = false;
@@ -75,8 +88,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
         showSnack("Badly formatted email address");
       }
-    }
-    else {
+    } else {
       setState(() {
         _isLoading = false;
       });
@@ -92,7 +104,6 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> showSnack(res) {
     return showSnackBar(res, context);
   }
-
 
   @override
   Widget build(BuildContext context) {
