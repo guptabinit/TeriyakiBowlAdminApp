@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:developer' as devtools show log;
 import 'dart:io';
 import 'dart:ui';
 
@@ -6,6 +8,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
+import 'package:flutter_background_service_android/flutter_background_service_android.dart'
+    show AndroidServiceInstance;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:teriyaki_bowl_admin_app/views/onboarding/splash_screen.dart';
@@ -133,6 +137,7 @@ Future<void> initializeService(
       onStart: onStart,
       autoStart: true,
       isForegroundMode: true,
+      autoStartOnBoot: true,
       notificationChannelId: notificationChannelId,
       initialNotificationTitle: 'Teriyaki Bowl Admin',
       initialNotificationContent: 'Ordering service for Teriyaki Bowl',
@@ -179,7 +184,34 @@ Future<bool> onIosBackground(ServiceInstance service) async {
 @pragma('vm:entry-point')
 void onStart(ServiceInstance service) async {
   DartPluginRegistrant.ensureInitialized();
+
+  if (service is AndroidServiceInstance) {
+    service.on('setAsForeground').listen((event) {
+      service.setAsForegroundService();
+    });
+
+    service.on('setAsBackground').listen((event) {
+      service.setAsBackgroundService();
+    });
+
+    service.on('stopService').listen((event) {
+      service.stopSelf();
+    });
+  }
+
+  Timer.periodic(
+    const Duration(minutes: 1),
+    (timer) async {
+      'Service is running...'.log();
+    },
+  );
 }
 
 const notificationChannelId = 'notification_foreground_service';
 const notificationId = 1000;
+
+extension Logger on Object {
+  void log() {
+    devtools.log(toString());
+  }
+}
