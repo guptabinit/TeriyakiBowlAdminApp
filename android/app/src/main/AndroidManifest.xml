@@ -8,7 +8,7 @@
 
     <application
         android:icon="@mipmap/ic_launcher"
-        android:label="teriyaki_bowl_admin_app">
+        android:label="TK Bowl Admin">
         <activity
             android:name="io.flutter.embedding.android.FlutterActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"

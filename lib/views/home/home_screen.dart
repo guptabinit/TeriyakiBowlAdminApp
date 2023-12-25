@@ -9,7 +9,6 @@ import 'package:teriyaki_bowl_admin_app/views/onboarding/login_screen.dart';
 import 'package:teriyaki_bowl_admin_app/views/screens/coupon_screen.dart';
 import 'package:teriyaki_bowl_admin_app/views/screens/promotion_screen.dart';
 import 'package:velocity_x/velocity_x.dart';
-
 import '../../common/widgets/text_field.dart';
 import '../../resources/firestore_methods.dart';
 import '../../utils/colors.dart';

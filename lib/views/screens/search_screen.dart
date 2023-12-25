@@ -88,10 +88,10 @@ class _SearchOrderScreenState extends State<SearchOrderScreen> {
               physics: const BouncingScrollPhysics(decelerationRate: ScrollDecelerationRate.fast),
               child: !isShowItem
                   ? const Center(
-                      child: Text("Search Order..."),
+                      child: Text("Enter the Order ID..."),
                     )
                   : StreamBuilder(
-                      stream: FirebaseFirestore.instance.collection('allOrders').where('oid', isGreaterThanOrEqualTo: searchController.text.toString()).orderBy('oid', descending: true).snapshots(),
+                      stream: FirebaseFirestore.instance.collection('allOrders').where('oid', isEqualTo: searchController.text.toString()).snapshots(),
                       builder: (context, AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
                         if (snapshot.connectionState == ConnectionState.waiting) {
                           return const Center(
@@ -105,7 +105,7 @@ class _SearchOrderScreenState extends State<SearchOrderScreen> {
 
                         return listLength == 0
                             ? Center(
-                                child: "No Existing Order".text.bold.make(),
+                                child: "No Order Found".text.bold.make(),
                               )
                             : ListView.builder(
                                 shrinkWrap: true,

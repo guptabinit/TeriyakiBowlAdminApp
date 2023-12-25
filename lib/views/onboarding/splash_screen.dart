@@ -86,10 +86,25 @@ class SplashScreenState extends State<SplashScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Expanded(
-                child: Image.asset(
-                  "assets/logov1.png",
-                  height: 160,
-                  width: 160,
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Image.asset(
+                        "assets/logov1.png",
+                        height: 160,
+                        width: 160,
+                      ),
+                      24.heightBox,
+                      const Text(
+                        "Admin/Restaurant App",
+                        style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               const CircularProgressIndicator(
@@ -97,7 +112,7 @@ class SplashScreenState extends State<SplashScreen> {
               ),
               24.heightBox,
               const Text(
-                "Powered by MITS",
+                "Powered by JP Digital Agency",
                 style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold
