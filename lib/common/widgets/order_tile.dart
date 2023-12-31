@@ -45,7 +45,6 @@ class _OrderTileState extends State<OrderTile> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-
         Get.to(() => OrderDetailScreen(snap: widget.snap,));
       },
       child: Container(

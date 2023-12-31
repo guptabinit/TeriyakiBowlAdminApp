@@ -389,35 +389,6 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                       );
                     },
                   ),
-
-                  Row(
-                    children: [
-                      const Text(
-                        "Cooking Instruction (if any): ",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: darkTextGreyColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                      Expanded(child: Container(),),
-                    ],
-                  ),
-                  4.heightBox,
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          widget.snap['cookingInstruction'] == "" ? "None" : "${widget.snap['cookingInstruction']}",
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w400,
-                            color: darkColor,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
                 ],
               ),
 
@@ -468,7 +439,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                         ),
                       ),
                       Text(
-                        "+1-${widget.snap['mobile']}",
+                        "${widget.snap['mobile']}",
                         style: const TextStyle(
                           fontWeight: FontWeight.w500,
                           color: darkColor,
@@ -549,7 +520,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                         ),
                       ),
                       Text(
-                        "-\$ ${widget.snap['discount'].toStringAsFixed(2)}",
+                        "-\$ ${widget.snap['discount_amount'].toStringAsFixed(2)}",
                         style: const TextStyle(
                           fontWeight: FontWeight.w500,
                           color: darkColor,
@@ -570,7 +541,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                         ),
                       ),
                       Text(
-                        "\$ ${(widget.snap['order_total'] - widget.snap['cart']['cart_amount'] + widget.snap['discount'] - widget.snap['delivery_cost']).toStringAsFixed(2)}",
+                        "\$ ${widget.snap['tax_amount'].toStringAsFixed(2)}",
                         style: const TextStyle(
                           fontWeight: FontWeight.w500,
                           color: darkColor,

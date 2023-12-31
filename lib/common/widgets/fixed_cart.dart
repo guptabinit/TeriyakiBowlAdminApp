@@ -52,11 +52,19 @@ class _FixedCartTileState extends State<FixedCartTile> {
           ),
           Text(
             "with ${widget.itemSnap['selectedQuantity'] != "null" ? "${widget.itemSnap['selectedQuantity']}, " : ""}${widget.itemSnap['selectedVarient'] != "null" ? "${widget.itemSnap['selectedVarient']}, " : ""}${widget.itemSnap['selectedAddon'].length != 0 ? "${widget.itemSnap['selectedAddon']}, " : ""}${widget.itemSnap['selectedRemoval'].length != 0 ? "${widget.itemSnap['selectedRemoval']}" : ""}",
-            style: const TextStyle(
-              color: Colors.grey,
+            style: TextStyle(
+              color: Colors.grey[600],
               fontStyle: FontStyle.italic,
             ),
-          )
+          ),
+          widget.itemSnap['specialInstruction'] != "" ? 4.heightBox : Container(),
+          widget.itemSnap['specialInstruction'] != "" ? Text(
+            "Sp. Instruction: ${widget.itemSnap['specialInstruction']}",
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontStyle: FontStyle.italic,
+            ),
+          ) : Container()
         ],
       ),
     );
