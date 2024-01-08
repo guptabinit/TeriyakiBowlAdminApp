@@ -478,6 +478,15 @@ class _EditItemScreenState extends State<EditItemScreen> {
                         btnText: 'Update',
                         onTap: () async {
                           await _updateItem();
+                          if (isUpdateFailed) {
+                            Get.snackbar(
+                              'Update failed',
+                              'Item updated failed',
+                              snackPosition: SnackPosition.BOTTOM,
+                              backgroundColor: Colors.red,
+                              margin: const EdgeInsets.all(10),
+                            );
+                          }
                           if (isUpdated) {
                             Get.back();
                             Get.snackbar(
