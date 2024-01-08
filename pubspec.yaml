@@ -39,7 +39,7 @@ dependencies:
   firebase_storage: ^11.2.3
   cloud_firestore: ^4.8.1
   shared_preferences: ^2.2.0
-  image_picker: ^0.8.8
+  image_picker: ^1.0.6
   cached_network_image: ^3.2.3
   url_launcher: ^6.1.11
 
@@ -52,6 +52,8 @@ dependencies:
   flutter_ringtone_player: ^3.2.0
   flutter_background_service: ^5.0.5
   flutter_background_service_android: ^6.2.2
+  json_annotation: ^4.8.1
+  freezed_annotation: ^2.4.1
 
 dev_dependencies:
   flutter_test:
@@ -64,6 +66,9 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^2.0.0
+  json_serializable: ^6.7.1
+  build_runner: ^2.4.7
+  freezed: ^2.4.6
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

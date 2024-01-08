@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -10,6 +9,7 @@ import 'package:teriyaki_bowl_admin_app/views/screens/categories_page.dart';
 import 'package:teriyaki_bowl_admin_app/views/screens/coupon_screen.dart';
 import 'package:teriyaki_bowl_admin_app/views/screens/promotion_screen.dart';
 import 'package:velocity_x/velocity_x.dart';
+
 import '../../common/widgets/text_field.dart';
 import '../../resources/firestore_methods.dart';
 import '../../utils/colors.dart';
@@ -31,7 +31,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
     taxController.dispose();
   }
@@ -46,7 +45,10 @@ class _HomeScreenState extends State<HomeScreen> {
     var taxData = {};
 
     try {
-      var snap = await FirebaseFirestore.instance.collection('commons').doc('tax').get();
+      var snap = await FirebaseFirestore.instance
+          .collection('commons')
+          .doc('tax')
+          .get();
 
       taxData = snap.data()!;
 
@@ -62,7 +64,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   getData() async {
     try {
-      var snap = await FirebaseFirestore.instance.collection('commons').doc('admin').get();
+      var snap = await FirebaseFirestore.instance
+          .collection('commons')
+          .doc('admin')
+          .get();
 
       adminData = snap.data()!;
     } catch (e) {
@@ -82,7 +87,8 @@ class _HomeScreenState extends State<HomeScreen> {
           borderRadius: BorderRadius.circular(8),
         ),
         child: Container(
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), color: lightColor),
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8), color: lightColor),
           padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -121,8 +127,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: CustomButton(
                       btnText: "Update",
                       onTap: () async {
-
-                        await FirestoreMethods().updateTax(tax: double.parse(taxController.text), context: context);
+                        await FirestoreMethods().updateTax(
+                            tax: double.parse(taxController.text),
+                            context: context);
 
                         Get.back();
                       },
@@ -210,7 +217,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       Get.to(() => const OrderBookScreen());
                     },
                     child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 24, horizontal: 16),
                       child: Row(
                         children: [
                           const Icon(Icons.shopping_cart_outlined),
@@ -218,7 +226,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           const Expanded(
                             child: Text(
                               "Order Book",
-                              style: TextStyle(fontSize: 16, color: darkColor, fontWeight: FontWeight.w600),
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  color: darkColor,
+                                  fontWeight: FontWeight.w600),
                             ),
                           ),
                           8.widthBox,
@@ -239,7 +250,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       Get.to(() => const CouponScreen());
                     },
                     child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 24, horizontal: 16),
                       child: Row(
                         children: [
                           const Icon(Icons.discount_outlined),
@@ -247,7 +259,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           const Expanded(
                             child: Text(
                               "Manage Coupons",
-                              style: TextStyle(fontSize: 16, color: darkColor, fontWeight: FontWeight.w600),
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  color: darkColor,
+                                  fontWeight: FontWeight.w600),
                             ),
                           ),
                           8.widthBox,
@@ -278,7 +293,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       showTaxDialogF();
                     },
                     child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 24, horizontal: 16),
                       child: Row(
                         children: [
                           const Icon(Icons.percent),
@@ -286,7 +302,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           const Expanded(
                             child: Text(
                               "Manage Taxes",
-                              style: TextStyle(fontSize: 16, color: darkColor, fontWeight: FontWeight.w600),
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  color: darkColor,
+                                  fontWeight: FontWeight.w600),
                             ),
                           ),
                           8.widthBox,
@@ -307,7 +326,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       Get.to(() => const PromotionScreen());
                     },
                     child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 24, horizontal: 16),
                       child: Row(
                         children: [
                           const Icon(Icons.discount_outlined),
@@ -340,7 +360,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       Get.to(() => const CategoriesScreen());
                     },
                     child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 24,
+                        horizontal: 16,
+                      ),
                       child: Row(
                         children: [
                           const Icon(Icons.discount_outlined),
@@ -365,7 +388,10 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
-          taxLoading ? const Center(child: CircularProgressIndicator(color: primaryColor)) : Container(),
+          taxLoading
+              ? const Center(
+                  child: CircularProgressIndicator(color: primaryColor))
+              : Container(),
         ],
       ),
     );

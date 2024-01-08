@@ -1,10 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:teriyaki_bowl_admin_app/views/screens/edit_item_screen.dart';
 import 'package:velocity_x/velocity_x.dart';
 
 import '../../common/components/button.dart';
@@ -89,6 +87,24 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
             color: lightColor,
           ),
         ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              final itemId = widget.snap['iid'] as int?;
+              if (itemId != null) {
+                Get.to(
+                  () => EditItemScreen(
+                    itemId: itemId,
+                  ),
+                );
+              }
+            },
+            icon: const Icon(
+              Icons.edit,
+              color: Colors.white,
+            ),
+          ),
+        ],
       ),
       body: Stack(
         fit: StackFit.expand,
@@ -465,10 +481,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                 ? const Center(
                     child: CircularProgressIndicator(),
                   )
-                : CustomButton(
-                    btnText: 'Add to Cart',
-                    onTap: (){}
-                  ),
+                : CustomButton(btnText: 'Add to Cart', onTap: () {}),
           ),
         ],
       ),
@@ -519,5 +532,4 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
       ),
     );
   }
-
 }

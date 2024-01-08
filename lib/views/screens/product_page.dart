@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:velocity_x/velocity_x.dart';
 
 import '../../utils/colors.dart';
 import '../cards/grid_card.dart';
@@ -61,10 +60,10 @@ class _ProductsPageState extends State<ProductsPage> {
             if (widget.category == 0) {
               return StreamBuilder(
                 stream:
-                FirebaseFirestore.instance.collection('items').snapshots(),
+                    FirebaseFirestore.instance.collection('items').snapshots(),
                 builder: (context,
                     AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>>
-                    snapshot) {
+                        snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(
                       child: CircularProgressIndicator(
@@ -87,7 +86,7 @@ class _ProductsPageState extends State<ProductsPage> {
                     .snapshots(),
                 builder: (context,
                     AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>>
-                    snapshot) {
+                        snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(
                       child: CircularProgressIndicator(
@@ -110,7 +109,7 @@ class _ProductsPageState extends State<ProductsPage> {
                     .snapshots(),
                 builder: (context,
                     AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>>
-                    snapshot) {
+                        snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(
                       child: CircularProgressIndicator(
@@ -133,7 +132,7 @@ class _ProductsPageState extends State<ProductsPage> {
                     .snapshots(),
                 builder: (context,
                     AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>>
-                    snapshot) {
+                        snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(
                       child: CircularProgressIndicator(
@@ -156,7 +155,7 @@ class _ProductsPageState extends State<ProductsPage> {
                     .snapshots(),
                 builder: (context,
                     AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>>
-                    snapshot) {
+                        snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(
                       child: CircularProgressIndicator(
@@ -179,7 +178,7 @@ class _ProductsPageState extends State<ProductsPage> {
                     .snapshots(),
                 builder: (context,
                     AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>>
-                    snapshot) {
+                        snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(
                       child: CircularProgressIndicator(
@@ -202,7 +201,7 @@ class _ProductsPageState extends State<ProductsPage> {
                     .snapshots(),
                 builder: (context,
                     AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>>
-                    snapshot) {
+                        snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(
                       child: CircularProgressIndicator(
@@ -219,10 +218,15 @@ class _ProductsPageState extends State<ProductsPage> {
             }
 
             return StreamBuilder(
-              stream:
-              FirebaseFirestore.instance.collection('items').snapshots(),
-              builder: (context,
-                  AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
+              stream: FirebaseFirestore.instance
+                  .collection(
+                    'items',
+                  )
+                  .snapshots(),
+              builder: (
+                context,
+                AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot,
+              ) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(
                     child: CircularProgressIndicator(
@@ -270,21 +274,27 @@ class GridViewContent extends StatelessWidget {
         physics: const BouncingScrollPhysics(
             decelerationRate: ScrollDecelerationRate.fast),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 12,
-            childAspectRatio: 2 / 2.7,
-            mainAxisSpacing: 12),
-        padding: const EdgeInsets.only(left: 12, right: 12, bottom: 12, top: 8),
+          crossAxisCount: 2,
+          crossAxisSpacing: 12,
+          childAspectRatio: 2 / 2.7,
+          mainAxisSpacing: 12,
+        ),
+        padding: const EdgeInsets.only(
+          left: 12,
+          right: 12,
+          bottom: 12,
+          top: 8,
+        ),
         itemCount: snapshot.data!.docs.length,
         itemBuilder: (BuildContext context, index) {
           var snap = snapshot.data!.docs[index].data();
           return GestureDetector(
             onTap: () {
               Get.to(() => ItemDetailScreen(
-                snap: snap,
-              ));
+                    snap: snap,
+                  ));
             },
-            child: GridCard( snap: snap),
+            child: GridCard(snap: snap),
           );
         },
       ),
