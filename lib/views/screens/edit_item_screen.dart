@@ -1,8 +1,10 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:teriyaki_bowl_admin_app/common/components/button.dart';
 import 'package:teriyaki_bowl_admin_app/common/widgets/text_field.dart';
@@ -23,6 +25,11 @@ class EditItemScreen extends StatefulWidget {
 }
 
 class _EditItemScreenState extends State<EditItemScreen> {
+  bool isUpdating = false;
+  bool isUpdated = true;
+  bool isUpdateFailed = false;
+  String? updateErrorMessage;
+
   XFile? selectedImage;
 
   late TextEditingController nameController;
@@ -38,19 +45,23 @@ class _EditItemScreenState extends State<EditItemScreen> {
   Item? item;
 
   var isVarientAvailable = false;
-  List<Varient?> varients = [];
+  late List<Varient?> varients;
 
   var isAddonsAvailable = false;
-  List<Addon?> addons = [];
+  late List<Addon?> addons;
 
   var isRemovalsAvailable = false;
-  List<Removal?> removals = [];
+  late List<Removal?> removals;
 
   var isQuantityAvailable = false;
-  List<Quantity?> quantities = [];
+  late List<Quantity?> quantities;
 
   @override
   void initState() {
+    varients = [];
+    addons = [];
+    removals = [];
+    quantities = [];
     nameController = TextEditingController();
     descriptionController = TextEditingController();
     priceController = TextEditingController();
@@ -73,6 +84,109 @@ class _EditItemScreenState extends State<EditItemScreen> {
     totalOrderController.dispose();
 
     super.dispose();
+  }
+
+  Future<void> _updateItem() async {
+    isUpdating = true;
+    isUpdated = false;
+    isUpdateFailed = false;
+    updateErrorMessage = null;
+    setState(() {});
+    try {
+      final data = <String, dynamic>{
+        'item_description': descriptionController.text,
+        'item_name': nameController.text,
+        'item_price': double.tryParse(priceController.text) ?? 0,
+        'item_sub_category': subCategoryController.text,
+        'prep_time': double.tryParse(prepTimeController.text) ?? 0,
+        'total_order': double.tryParse(totalOrderController.text) ?? 0,
+      };
+
+      if (isQuantityAvailable) {
+        data['qty_avail'] = true;
+        data['quantity'] = quantities
+            .map((e) => ({
+                  'quantity': e?.quantity ?? '',
+                  'quantityPrice': e?.quantityPrice ?? 0,
+                }))
+            .toList();
+      } else {
+        data['qty_avail'] = false;
+        data['quantity'] = [];
+      }
+
+      if (isRemovalsAvailable) {
+        data['removal_avail'] = true;
+        data['removals'] = removals
+            .map((e) => ({
+                  'removalname': e?.removalName ?? '',
+                }))
+            .toList();
+      } else {
+        data['removal_avail'] = false;
+        data['removals'] = [];
+      }
+
+      if (isAddonsAvailable) {
+        data['addon_avail'] = true;
+        data['addons'] = addons
+            .map((e) => ({
+                  'addonName': e?.addonName ?? '',
+                  'addonPrice': e?.addonPrice ?? 0,
+                }))
+            .toList();
+      } else {
+        data['addon_avail'] = false;
+        data['addons'] = [];
+      }
+
+      if (isVarientAvailable) {
+        data['varient_avail'] = true;
+        data['varients'] = varients
+            .map((e) => ({
+                  'varientName': e?.varientName ?? '',
+                  'varientPrice': e?.varientPrice ?? 0,
+                }))
+            .toList();
+      } else {
+        data['varient_avail'] = false;
+        data['varients'] = [];
+      }
+
+      if (selectedImage != null) {
+        final storageRef = FirebaseStorage.instance.ref();
+
+        final itemImageRef = storageRef.child('items/${selectedImage!.name}');
+
+        final itemImage = await itemImageRef.putFile(
+          File(selectedImage!.path),
+          SettableMetadata(
+            contentType: selectedImage!.mimeType,
+          ),
+        );
+
+        final itemImageUrl = await itemImage.ref.getDownloadURL();
+
+        data['item_image'] = itemImageUrl;
+      }
+
+      await FirebaseFirestore.instance
+          .collection('items')
+          .doc('${widget.itemId}')
+          .update(data);
+
+      isUpdating = false;
+      isUpdated = true;
+      isUpdateFailed = false;
+      updateErrorMessage = null;
+      setState(() {});
+    } catch (e) {
+      isUpdating = false;
+      isUpdated = false;
+      isUpdateFailed = true;
+      updateErrorMessage = 'Something went wrong!';
+      setState(() {});
+    }
   }
 
   @override
@@ -347,21 +461,35 @@ class _EditItemScreenState extends State<EditItemScreen> {
                   ItemQuantityWidget(
                     quantity: quantities,
                     onNewQuantityPressed: () {
-                      setState(() {
-                        quantities.add(const Quantity());
-                      });
+                      quantities.add(const Quantity());
+                      setState(() {});
                     },
                     onQuantityRemovePressed: (index) {
-                      setState(() {
-                        quantities.removeAt(index);
-                      });
+                      quantities.removeAt(index);
+                      setState(() {});
                     },
                   ),
                 20.heightBox,
-                CustomButton(
-                  btnText: 'Update',
-                  onTap: () {},
-                ),
+                isUpdating
+                    ? const Center(
+                        child: CircularProgressIndicator(),
+                      )
+                    : CustomButton(
+                        btnText: 'Update',
+                        onTap: () async {
+                          await _updateItem();
+                          if (isUpdated) {
+                            Get.back();
+                            Get.snackbar(
+                              'Updated',
+                              'Item updated succeed',
+                              snackPosition: SnackPosition.BOTTOM,
+                              backgroundColor: Colors.green,
+                              margin: const EdgeInsets.all(10),
+                            );
+                          }
+                        },
+                      ),
                 20.heightBox,
               ],
             ],
@@ -384,20 +512,19 @@ class _EditItemScreenState extends State<EditItemScreen> {
           .doc('$id')
           .get();
       final item = Item.fromJson(doc.data() ?? {});
+      this.item = item;
       if (item.varients?.isNotEmpty == true) {
-        varients = item.varients ?? [];
+        varients = [...?item.varients];
       }
       if (item.quantity?.isNotEmpty == true) {
-        quantities = item.quantity ?? [];
+        quantities = [...?item.quantity];
       }
       if (item.removals?.isNotEmpty == true) {
-        removals = item.removals ?? [];
+        removals = [...?item.removals];
       }
       if (item.addons?.isNotEmpty == true) {
-        addons = item.addons ?? [];
+        addons = [...?item.addons];
       }
-      isLoading = false;
-      this.item = item;
       nameController.text = item.itemName ?? '';
       descriptionController.text = item.itemDescription ?? '';
       priceController.text = '${item.itemPrice}';
@@ -408,6 +535,7 @@ class _EditItemScreenState extends State<EditItemScreen> {
       isAddonsAvailable = item.addonAvail ?? false;
       isRemovalsAvailable = item.removalAvail ?? false;
       isQuantityAvailable = item.qtyAvail ?? false;
+      isLoading = false;
       setState(() {});
     } catch (e) {
       isLoading = false;
@@ -646,7 +774,7 @@ class DynamicAddonItem extends StatelessWidget {
       text: addon?.addonName ?? '',
     );
     final addonPriceController = TextEditingController(
-      text: '${addon?.addonPrice}',
+      text: '${addon?.addonPrice ?? ''}',
     );
 
     return Column(
