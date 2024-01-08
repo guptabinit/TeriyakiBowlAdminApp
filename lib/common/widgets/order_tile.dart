@@ -1,15 +1,12 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:teriyaki_bowl_admin_app/utils/colors.dart';
 import 'package:teriyaki_bowl_admin_app/views/screens/order_detail_screen.dart';
 import 'package:velocity_x/velocity_x.dart';
 
-import '../../resources/firestore_methods.dart';
-import '../../utils/colors.dart';
-import '../../utils/utils.dart';
 
 class OrderTile extends StatefulWidget {
-  final snap;
+  final dynamic snap;
 
   const OrderTile({super.key, required this.snap});
 

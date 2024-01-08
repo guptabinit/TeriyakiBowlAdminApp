@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -38,19 +37,22 @@ class _PromotionScreenState extends State<PromotionScreen> {
 
   getData() async {
     try {
-      var snap = await FirebaseFirestore.instance.collection('commons').doc('promotions').get();
+      var snap = await FirebaseFirestore.instance
+          .collection('commons')
+          .doc('promotions')
+          .get();
 
       setState(() {
         promotionNumber = snap.data()!['promotionNumber'];
       });
     } catch (e) {
+      if (!mounted) return;
       showSnackBar("Some error occurred", context);
     }
   }
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     Future.delayed(Duration.zero, () {
       getData();
@@ -117,7 +119,10 @@ class _PromotionScreenState extends State<PromotionScreen> {
               ),
             )
           : StreamBuilder(
-              stream: FirebaseFirestore.instance.collection('commons').doc('promotions').snapshots(),
+              stream: FirebaseFirestore.instance
+                  .collection('commons')
+                  .doc('promotions')
+                  .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(
@@ -136,7 +141,6 @@ class _PromotionScreenState extends State<PromotionScreen> {
                   itemCount: length,
                   shrinkWrap: true,
                   itemBuilder: (BuildContext context, index) {
-
                     var mainSnap = snap[snap['promotion_list'][index]];
 
                     return Stack(
@@ -150,7 +154,8 @@ class _PromotionScreenState extends State<PromotionScreen> {
                             onPressed: () {
                               setState(() {
                                 titleController.text = mainSnap['title'];
-                                descriptionController.text = mainSnap['description'];
+                                descriptionController.text =
+                                    mainSnap['description'];
                               });
 
                               showUpdateDialogF(mainSnap);
@@ -178,7 +183,8 @@ class _PromotionScreenState extends State<PromotionScreen> {
           borderRadius: BorderRadius.circular(8),
         ),
         child: Container(
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), color: lightColor),
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8), color: lightColor),
           padding: const EdgeInsets.all(16),
           child: SingleChildScrollView(
             child: Column(
@@ -197,7 +203,9 @@ class _PromotionScreenState extends State<PromotionScreen> {
                   },
                   child: Container(
                     padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(8)),
+                    decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(8)),
                     child: const Center(
                       child: Text(
                         "Image already selected click here to update",
@@ -229,7 +237,9 @@ class _PromotionScreenState extends State<PromotionScreen> {
                             isLoading = true;
                           });
 
-                          await FirestoreMethods().deletePromotion(promotionID: snap['promotion_id'], context: context);
+                          await FirestoreMethods().deletePromotion(
+                              promotionID: snap['promotion_id'],
+                              context: context);
 
                           setState(() {
                             isLoading = false;
@@ -244,7 +254,6 @@ class _PromotionScreenState extends State<PromotionScreen> {
                       child: CustomButton(
                         btnText: "Update",
                         onTap: () async {
-
                           setState(() {
                             isLoading = true;
                           });
@@ -299,7 +308,8 @@ class _PromotionScreenState extends State<PromotionScreen> {
           borderRadius: BorderRadius.circular(8),
         ),
         child: Container(
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), color: lightColor),
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8), color: lightColor),
           padding: const EdgeInsets.all(16),
           child: SingleChildScrollView(
             child: Column(
@@ -318,10 +328,14 @@ class _PromotionScreenState extends State<PromotionScreen> {
                   },
                   child: Container(
                     padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(8)),
+                    decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(8)),
                     child: Center(
                         child: Text(
-                      _image != null ? "Image already selected click here to update" : "Click here to select an image",
+                      _image != null
+                          ? "Image already selected click here to update"
+                          : "Click here to select an image",
                       textAlign: TextAlign.center,
                     )),
                   ),

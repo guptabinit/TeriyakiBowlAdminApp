@@ -5,7 +5,7 @@ import 'package:velocity_x/velocity_x.dart';
 import '../../utils/colors.dart';
 
 class PromotionalCard extends StatefulWidget {
-  final snap;
+  final dynamic snap;
   const PromotionalCard({super.key, required this.snap});
 
   @override
@@ -13,7 +13,6 @@ class PromotionalCard extends StatefulWidget {
 }
 
 class _PromotionalCardState extends State<PromotionalCard> {
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -43,7 +42,8 @@ class _PromotionalCardState extends State<PromotionalCard> {
               key: UniqueKey(),
               imageUrl: widget.snap['image_link'],
               fit: BoxFit.cover,
-              placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
+              placeholder: (context, url) =>
+                  const Center(child: CircularProgressIndicator()),
             ),
           ),
           Padding(
@@ -53,7 +53,8 @@ class _PromotionalCardState extends State<PromotionalCard> {
               children: [
                 Text(
                   widget.snap['title'],
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 4.heightBox,
                 Text(widget.snap['description']),
@@ -66,4 +67,3 @@ class _PromotionalCardState extends State<PromotionalCard> {
     );
   }
 }
-

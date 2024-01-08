@@ -1,11 +1,10 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:teriyaki_bowl_admin_app/common/components/button.dart';
-import 'package:teriyaki_bowl_admin_app/common/widgets/order_tile.dart';
+import 'package:teriyaki_bowl_admin_app/controllers/receipt_print_controller.dart';
 import 'package:teriyaki_bowl_admin_app/resources/firestore_methods.dart';
+import 'package:teriyaki_bowl_admin_app/star_io_10/star_io_10.dart';
 import 'package:teriyaki_bowl_admin_app/utils/utils.dart';
 import 'package:velocity_x/velocity_x.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -14,7 +13,7 @@ import '../../common/widgets/fixed_cart.dart';
 import '../../utils/colors.dart';
 
 class OrderDetailScreen extends StatefulWidget {
-  final snap;
+  final dynamic snap;
 
   const OrderDetailScreen({super.key, required this.snap});
 
@@ -26,9 +25,79 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   int? _selectedOrderOption = 0;
   bool? _selectedPaymentOption = false;
 
+  void _onPrintReceipt() {
+    int totalLength = 48;
+
+    List<String> itemIds = List<String>.from(widget.snap['cart']['items']);
+    Map<String, dynamic> printingData = {
+      'customer_name': widget.snap['name'],
+      'pickup_time': widget.snap['pickup_time'],
+      'order_number': '#${widget.snap['oid']}',
+      'total_items': '${itemIds.length} Items',
+    };
+
+    String subTotal =
+        '\$${widget.snap['cart']['cart_amount'].toStringAsFixed(2)}';
+    printingData.putIfAbsent('sub_total', () {
+      int length = totalLength - (8 + subTotal.length);
+      return 'Subtotal${List.generate((length), (_) => ' ').join()}$subTotal';
+    });
+
+    String tax = '\$${widget.snap['tax_amount'].toStringAsFixed(2)}';
+    printingData.putIfAbsent('tax', () {
+      int length = totalLength - (3 + tax.length);
+      return 'Tax${List.generate((length), (_) => ' ').join()}$tax';
+    });
+    String total = '\$${widget.snap['order_total'].toStringAsFixed(2)}';
+    printingData.putIfAbsent('total', () {
+      int length = totalLength - (5 + total.length);
+      return 'Total${List.generate((length), (_) => ' ').join()}$total';
+    });
+
+    List<Map<String, dynamic>> items = [];
+
+    for (String itemId in itemIds) {
+      dynamic item = widget.snap['cart'][itemId];
+
+      String firstPart = '${item['quantity']} x ${item['item_name']}';
+      String secondPart = '\$${item['total_price'].toStringAsFixed(2)}';
+
+      int length = totalLength - (firstPart.length + secondPart.length);
+
+      String? modifiers = item['selectedAddon'].join(', ');
+
+      items.add({
+        'item':
+            firstPart + List.generate((length), (_) => ' ').join() + secondPart,
+        'modifiers': (modifiers != null && modifiers.isNotEmpty)
+            ? '$modifiers\n------------------------------------------------'
+            : '------------------------------------------------\n',
+      });
+    }
+
+    printingData.putIfAbsent('items', () => items);
+
+    ScaffoldMessengerState state = ScaffoldMessenger.of(context);
+    StarPrinter? printer = ReceiptPrintController.getStarPrinter();
+    if (printer == null) {
+      state
+        ..hideCurrentSnackBar()
+        ..showSnackBar(const SnackBar(content: Text('Printer not found')));
+      return;
+    }
+    StarIO10.print(
+      printer: printer,
+      printingData: printingData,
+      onFailed: (message) {
+        state
+          ..hideCurrentSnackBar()
+          ..showSnackBar(SnackBar(content: Text(message)));
+      },
+    );
+  }
+
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
 
     widget.snap['read'] == false ? updateReadOrder() : null;
@@ -41,11 +110,11 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
 
   String orderStatus() {
     if (widget.snap['order_status'] == 0) {
-      return "In Process";
+      return 'In Process';
     } else if (widget.snap['order_status'] == 1) {
-      return "Completed";
+      return 'Completed';
     }
-    return "Cancelled";
+    return 'Cancelled';
   }
 
   Color colorStatus() {
@@ -75,17 +144,17 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       setState(() {
         _isLoading = false;
       });
-      showingSnackbar("Order update successfully");
+      showingSnackbar('Order update successfully');
       Get.back();
     } else {
       setState(() {
         _isLoading = false;
       });
-      showingSnackbar("Error: $message");
+      showingSnackbar('Error: $message');
     }
   }
 
-  showingSnackbar(String msg){
+  showingSnackbar(String msg) {
     return showSnackBar(msg, context);
   }
 
@@ -111,7 +180,6 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -122,7 +190,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         backgroundColor: primaryColor,
         centerTitle: true,
         title: const Text(
-          "Order Details",
+          'Order Details',
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
             fontWeight: FontWeight.w500,
@@ -141,770 +209,818 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           ),
         ),
       ),
-      body: _isMainLoading ? const Center(child: CircularProgressIndicator(),) : SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      "Order No #${widget.snap['oid']}",
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: darkColor,
-                        fontSize: 20,
+      body: _isMainLoading
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
+          : SafeArea(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'Order No #${widget.snap['oid']}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color: darkColor,
+                                fontSize: 20,
+                              ),
+                            ),
+                          ),
+                          4.widthBox,
+                          Text(
+                            orderStatus(),
+                            style: TextStyle(
+                              fontWeight: FontWeight.w500,
+                              color: colorStatus(),
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ),
-                  4.widthBox,
-                  Text(
-                    orderStatus(),
-                    style: TextStyle(
-                      fontWeight: FontWeight.w500,
-                      color: colorStatus(),
-                      fontSize: 16,
-                    ),
-                  ),
-                ],
-              ),
-              4.heightBox,
-              const Divider(),
+                      4.heightBox,
+                      const Divider(),
 
-              widget.snap['is_pickup'] ? Container() : Center(
-                child: SizedBox(
-                  width: double.infinity, // Set width to the whole screen
-                  child: TextButton(
-                    onPressed: () async {
-                      if (widget.snap['trackingUrl'] != null) {
-                        await launchUrlString(widget.snap['trackingUrl']);
-                      }
-                    },
-                    child: const Text(
-                      "Click to track your order",
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: primaryColor,
-                        fontSize: 14,
+                      widget.snap['is_pickup']
+                          ? Container()
+                          : Center(
+                              child: SizedBox(
+                                width: double
+                                    .infinity, // Set width to the whole screen
+                                child: TextButton(
+                                  onPressed: () async {
+                                    if (widget.snap['trackingUrl'] != null) {
+                                      await launchUrlString(
+                                          widget.snap['trackingUrl']);
+                                    }
+                                  },
+                                  child: const Text(
+                                    'Click to track your order',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: primaryColor,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                      widget.snap['is_pickup'] ? Container() : const Divider(),
+                      4.heightBox,
+                      // Imp Info Card
+                      Column(
+                        children: [
+                          const Text(
+                            'Important Info',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: darkColor,
+                              fontSize: 20,
+                            ),
+                          ),
+                          8.heightBox,
+                          Row(
+                            children: [
+                              const Text(
+                                'Mode: ',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: darkTextGreyColor,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              Text(
+                                widget.snap['is_pickup']
+                                    ? 'Pickup'
+                                    : 'Delivery',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: primaryColor,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                          6.heightBox,
+                          Row(
+                            children: [
+                              const Text(
+                                'Total Amount: ',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: darkTextGreyColor,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              Text(
+                                '\$ ${widget.snap['order_total'].toStringAsFixed(2)}',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: primaryColor,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                          6.heightBox,
+                          widget.snap['is_pickup']
+                              ? Row(
+                                  children: [
+                                    const Text(
+                                      'Pickup Time: ',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                        color: darkTextGreyColor,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                    Text(
+                                      '${widget.snap['pickup_time']}',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                        color: primaryColor,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              : Container(),
+                          widget.snap['is_pickup'] ? 6.heightBox : Container(),
+                          Row(
+                            children: [
+                              const Text(
+                                'Payment Mode: ',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: darkTextGreyColor,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              Text(
+                                widget.snap['is_cod'] ? 'COD' : 'Online',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: primaryColor,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                          6.heightBox,
+                          Row(
+                            children: [
+                              const Text(
+                                'Payment Status: ',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: darkTextGreyColor,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              Text(
+                                widget.snap['payment_completed']
+                                    ? 'PAID'
+                                    : 'UNPAID',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: widget.snap['payment_completed']
+                                      ? greenColor
+                                      : redColor,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                          6.heightBox,
+                          Row(
+                            children: [
+                              const Text(
+                                'Order Status: ',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: darkTextGreyColor,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              Text(
+                                orderStatus(),
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: colorStatus(),
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                          6.heightBox,
+                          Row(
+                            children: [
+                              const Text(
+                                'Order Time: ',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: darkTextGreyColor,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              Text(
+                                '${widget.snap['order_time']}',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: darkTextGreyColor,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                    ),
+
+                      4.heightBox,
+                      const Divider(),
+                      4.heightBox,
+                      // Delivery Info Card
+                      Column(
+                        children: [
+                          const Text(
+                            'Order Info',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: darkColor,
+                              fontSize: 20,
+                            ),
+                          ),
+                          8.heightBox,
+                          ListView.builder(
+                            shrinkWrap: true,
+                            padding: const EdgeInsets.all(12),
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: widget.snap['cart']['items'].length,
+                            itemBuilder: (BuildContext context, index) {
+                              var snap = widget.snap['cart']
+                                  [widget.snap['cart']['items'][index]];
+
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  FixedCartTile(
+                                    itemSnap: snap,
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+
+                      4.heightBox,
+                      const Divider(),
+                      4.heightBox,
+                      // Personal Info Card
+                      Column(
+                        children: [
+                          const Text(
+                            'Personal Info',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: darkColor,
+                              fontSize: 20,
+                            ),
+                          ),
+                          8.heightBox,
+                          Row(
+                            children: [
+                              const Text(
+                                'Name: ',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: darkTextGreyColor,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              Text(
+                                widget.snap['name'],
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: darkColor,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                          6.heightBox,
+                          Row(
+                            children: [
+                              const Text(
+                                'Phone: ',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: darkTextGreyColor,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              Text(
+                                '${widget.snap['mobile']}',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: darkColor,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                          6.heightBox,
+                          Row(
+                            children: [
+                              const Text(
+                                'Email: ',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: darkTextGreyColor,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              Text(
+                                widget.snap['email'],
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: darkColor,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+
+                      4.heightBox,
+                      const Divider(),
+                      4.heightBox,
+
+                      // Payment Info Card
+                      Column(
+                        children: [
+                          const Text(
+                            'Payment Info',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: darkColor,
+                              fontSize: 20,
+                            ),
+                          ),
+                          8.heightBox,
+                          Row(
+                            children: [
+                              const Text(
+                                'Price: ',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: darkTextGreyColor,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              Text(
+                                '\$ ${widget.snap['cart']['cart_amount'].toStringAsFixed(2)}',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: darkColor,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                          6.heightBox,
+                          Row(
+                            children: [
+                              Text(
+                                'Discount - ${widget.snap['coupon_code']}: ',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: darkTextGreyColor,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              Text(
+                                '-\$ ${widget.snap['discount_amount'].toStringAsFixed(2) ?? ''}',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: darkColor,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                          6.heightBox,
+                          Row(
+                            children: [
+                              const Text(
+                                'Tax: ',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: darkTextGreyColor,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              Text(
+                                '\$ ${widget.snap['tax_amount'].toStringAsFixed(2)}',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: darkColor,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                          6.heightBox,
+                          Row(
+                            children: [
+                              const Text(
+                                'Delivery Cost: ',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: darkTextGreyColor,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              Text(
+                                '\$ ${widget.snap['delivery_cost'].toStringAsFixed(2)}',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: darkColor,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                          6.heightBox,
+                          Row(
+                            children: [
+                              const Text(
+                                'Total Amount: ',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: darkTextGreyColor,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              Text(
+                                '\$ ${widget.snap['order_total'].toStringAsFixed(2)}',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  color: primaryColor,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                          6.heightBox,
+                          Row(
+                            children: [
+                              const Text(
+                                'Payment Mode: ',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: darkTextGreyColor,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              Text(
+                                widget.snap['is_cod'] ? 'COD' : 'Online',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: primaryColor,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                          6.heightBox,
+                          Row(
+                            children: [
+                              const Text(
+                                'Payment Status: ',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: darkTextGreyColor,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              Text(
+                                widget.snap['payment_completed']
+                                    ? 'PAID'
+                                    : 'UNPAID',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: widget.snap['payment_completed']
+                                      ? greenColor
+                                      : redColor,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                          widget.snap['transaction'] == null
+                              ? Container()
+                              : 6.heightBox,
+                          widget.snap['transaction'] == null
+                              ? Container()
+                              : Row(
+                                  children: [
+                                    const Text(
+                                      'Transaction ID: ',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                        color: darkTextGreyColor,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                    Text(
+                                      '${widget.snap['transaction']['transId']}',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        color: darkColor,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                        ],
+                      ),
+
+                      4.heightBox,
+                      const Divider(),
+                      widget.snap['is_pickup'] ? Container() : 4.heightBox,
+                      // Delivery Info Card
+                      widget.snap['is_pickup']
+                          ? Container()
+                          : Column(
+                              children: [
+                                const Text(
+                                  'Delivery Info',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    color: darkColor,
+                                    fontSize: 20,
+                                  ),
+                                ),
+                                8.heightBox,
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      'Address: ',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                        color: darkTextGreyColor,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Text(
+                                        '${widget.snap['deliveryInfo']['street']}, ${widget.snap['deliveryInfo']['locality']}, ${widget.snap['deliveryInfo']['city']}, ${widget.snap['deliveryInfo']['country']} - ${widget.snap['deliveryInfo']['zip']}',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w500,
+                                          color: darkColor,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                6.heightBox,
+                                Row(
+                                  children: [
+                                    const Text(
+                                      'Phone: ',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                        color: darkTextGreyColor,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                    Text(
+                                      '${widget.snap['deliveryInfo']['phone']}',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                        color: darkColor,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                6.heightBox,
+                                Row(
+                                  children: [
+                                    const Text(
+                                      'Name: ',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                        color: darkTextGreyColor,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                    Text(
+                                      widget.snap['deliveryInfo']['name'],
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                        color: darkColor,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                6.heightBox,
+                                Row(
+                                  children: [
+                                    const Text(
+                                      'Type: ',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                        color: darkTextGreyColor,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                    Text(
+                                      widget.snap['deliveryInfo']['title'],
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                        color: primaryColor,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+
+                      widget.snap['is_pickup'] ? Container() : 4.heightBox,
+                      widget.snap['is_pickup'] ? Container() : const Divider(),
+                      4.heightBox,
+                      // Update Info Card
+                      Column(
+                        children: [
+                          const Text(
+                            'Update Info',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: darkColor,
+                              fontSize: 20,
+                            ),
+                          ),
+                          8.heightBox,
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              const Text(
+                                'Update Order Status: ',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: darkTextGreyColor,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              8.heightBox,
+                              RadioListTile(
+                                title: const Text(
+                                  'In Process',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w500,
+                                    color: blueColor,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                value: 0,
+                                groupValue: _selectedOrderOption,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _selectedOrderOption = value;
+                                  });
+                                },
+                                activeColor: blueColor,
+                              ),
+                              RadioListTile(
+                                title: const Text(
+                                  'Completed ',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w500,
+                                    color: greenColor,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                value: 1,
+                                groupValue: _selectedOrderOption,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _selectedOrderOption = value;
+                                  });
+                                },
+                                activeColor: greenColor,
+                              ),
+                              RadioListTile(
+                                title: const Text(
+                                  'Cancelled',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w500,
+                                    color: redColor,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                value: 2,
+                                groupValue: _selectedOrderOption,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _selectedOrderOption = value;
+                                  });
+                                },
+                                activeColor: redColor,
+                              ),
+
+                              16.heightBox,
+                              // for payment
+                              const Text(
+                                'Update Payment Status: ',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: darkTextGreyColor,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              RadioListTile(
+                                title: const Text(
+                                  'Unpaid',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w500,
+                                    color: redColor,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                value: false,
+                                groupValue: _selectedPaymentOption,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _selectedPaymentOption = value;
+                                  });
+                                },
+                                activeColor: redColor,
+                              ),
+                              RadioListTile(
+                                title: const Text(
+                                  'Paid',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w500,
+                                    color: greenColor,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                value: true,
+                                groupValue: _selectedPaymentOption,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _selectedPaymentOption = value;
+                                  });
+                                },
+                                activeColor: greenColor,
+                              ),
+
+                              12.heightBox,
+                              // button
+                              !_isLoading
+                                  ? Row(
+                                      children: [
+                                        Expanded(
+                                          child: CustomButton(
+                                            btnText: 'Update Order',
+                                            onTap: updateOrder,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 15),
+                                        Expanded(
+                                          child: CustomButton(
+                                            btnText: 'Recepit Print',
+                                            onTap: _onPrintReceipt,
+                                          ),
+                                        ),
+                                      ],
+                                    )
+                                  : const Center(
+                                      child: CircularProgressIndicator(
+                                        color: primaryColor,
+                                      ),
+                                    ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
               ),
-              widget.snap['is_pickup'] ? Container() : const Divider(),
-              4.heightBox,
-              // Imp Info Card
-              Column(
-                children: [
-                  const Text(
-                    "Important Info",
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      color: darkColor,
-                      fontSize: 20,
-                    ),
-                  ),
-                  8.heightBox,
-                  Row(
-                    children: [
-                      const Text(
-                        "Mode: ",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: darkTextGreyColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                      Text(
-                        widget.snap['is_pickup'] ? "Pickup" : "Delivery",
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: primaryColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
-                  6.heightBox,
-                  Row(
-                    children: [
-                      const Text(
-                        "Total Amount: ",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: darkTextGreyColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                      Text(
-                        "\$ ${widget.snap['order_total'].toStringAsFixed(2)}",
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: primaryColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
-                  6.heightBox,
-                  widget.snap['is_pickup']
-                      ? Row(
-                          children: [
-                            const Text(
-                              "Pickup Time: ",
-                              style: TextStyle(
-                                fontWeight: FontWeight.w500,
-                                color: darkTextGreyColor,
-                                fontSize: 16,
-                              ),
-                            ),
-                            Text(
-                              "${widget.snap['pickup_time']}",
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w500,
-                                color: primaryColor,
-                                fontSize: 16,
-                              ),
-                            ),
-                          ],
-                        )
-                      : Container(),
-                  widget.snap['is_pickup'] ? 6.heightBox : Container(),
-                  Row(
-                    children: [
-                      const Text(
-                        "Payment Mode: ",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: darkTextGreyColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                      Text(
-                        widget.snap['is_cod'] ? "COD" : "Online",
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: primaryColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
-                  6.heightBox,
-                  Row(
-                    children: [
-                      const Text(
-                        "Payment Status: ",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: darkTextGreyColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                      Text(
-                        widget.snap['payment_completed'] ? "PAID" : "UNPAID",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: widget.snap['payment_completed'] ? greenColor : redColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
-                  6.heightBox,
-                  Row(
-                    children: [
-                      const Text(
-                        "Order Status: ",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: darkTextGreyColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                      Text(
-                        orderStatus(),
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: colorStatus(),
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
-                  6.heightBox,
-                  Row(
-                    children: [
-                      const Text(
-                        "Order Time: ",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: darkTextGreyColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                      Text(
-                        "${widget.snap['order_time']}",
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: darkTextGreyColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-
-              4.heightBox,
-              const Divider(),
-              4.heightBox,
-              // Delivery Info Card
-              Column(
-                children: [
-                  const Text(
-                    "Order Info",
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      color: darkColor,
-                      fontSize: 20,
-                    ),
-                  ),
-                  8.heightBox,
-                  ListView.builder(
-                    shrinkWrap: true,
-                    padding: const EdgeInsets.all(12),
-                    itemCount: widget.snap['cart']['items'].length,
-                    itemBuilder: (BuildContext context, index) {
-                      var snap = widget.snap['cart'][widget.snap['cart']['items'][index]];
-
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          FixedCartTile(
-                            itemSnap: snap,
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                ],
-              ),
-
-              4.heightBox,
-              const Divider(),
-              4.heightBox,
-              // Personal Info Card
-              Column(
-                children: [
-                  const Text(
-                    "Personal Info",
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      color: darkColor,
-                      fontSize: 20,
-                    ),
-                  ),
-                  8.heightBox,
-                  Row(
-                    children: [
-                      const Text(
-                        "Name: ",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: darkTextGreyColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                      Text(
-                        widget.snap['name'],
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: darkColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
-                  6.heightBox,
-                  Row(
-                    children: [
-                      const Text(
-                        "Phone: ",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: darkTextGreyColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                      Text(
-                        "${widget.snap['mobile']}",
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: darkColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
-                  6.heightBox,
-                  Row(
-                    children: [
-                      const Text(
-                        "Email: ",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: darkTextGreyColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                      Text(
-                        widget.snap['email'],
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: darkColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-
-              4.heightBox,
-              const Divider(),
-              4.heightBox,
-
-              // Payment Info Card
-              Column(
-                children: [
-                  const Text(
-                    "Payment Info",
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      color: darkColor,
-                      fontSize: 20,
-                    ),
-                  ),
-                  8.heightBox,
-                  Row(
-                    children: [
-                      const Text(
-                        "Price: ",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: darkTextGreyColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                      Text(
-                        "\$ ${widget.snap['cart']['cart_amount'].toStringAsFixed(2)}",
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: darkColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
-                  6.heightBox,
-                  Row(
-                    children: [
-                      Text(
-                        "Discount - ${widget.snap['coupon_code']}: ",
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: darkTextGreyColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                      Text(
-                        "-\$ ${widget.snap['discount_amount'].toStringAsFixed(2)}",
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: darkColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
-                  6.heightBox,
-                  Row(
-                    children: [
-                      const Text(
-                        "Tax: ",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: darkTextGreyColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                      Text(
-                        "\$ ${widget.snap['tax_amount'].toStringAsFixed(2)}",
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: darkColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
-                  6.heightBox,
-                  Row(
-                    children: [
-                      const Text(
-                        "Delivery Cost: ",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: darkTextGreyColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                      Text(
-                        "\$ ${widget.snap['delivery_cost'].toStringAsFixed(2)}",
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: darkColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
-                  6.heightBox,
-                  Row(
-                    children: [
-                      const Text(
-                        "Total Amount: ",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: darkTextGreyColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                      Text(
-                        "\$ ${widget.snap['order_total'].toStringAsFixed(2)}",
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: primaryColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
-                  6.heightBox,
-                  Row(
-                    children: [
-                      const Text(
-                        "Payment Mode: ",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: darkTextGreyColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                      Text(
-                        widget.snap['is_cod'] ? "COD" : "Online",
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: primaryColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
-                  6.heightBox,
-                  Row(
-                    children: [
-                      const Text(
-                        "Payment Status: ",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: darkTextGreyColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                      Text(
-                        widget.snap['payment_completed'] ? "PAID" : "UNPAID",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: widget.snap['payment_completed'] ? greenColor : redColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
-                  widget.snap['transaction'] == null ? Container() : 6.heightBox,
-                  widget.snap['transaction'] == null ? Container() : Row(
-                    children: [
-                      const Text(
-                        "Transaction ID: ",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: darkTextGreyColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                      Text(
-                        "${widget.snap['transaction']['transId']}",
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: darkColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-
-              4.heightBox,
-              const Divider(),
-              widget.snap['is_pickup'] ? Container() : 4.heightBox,
-              // Delivery Info Card
-              widget.snap['is_pickup'] ? Container() : Column(
-                children: [
-                  const Text(
-                    "Delivery Info",
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      color: darkColor,
-                      fontSize: 20,
-                    ),
-                  ),
-                  8.heightBox,
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        "Address: ",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: darkTextGreyColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                      Expanded(
-                        child: Text(
-                          "${widget.snap['deliveryInfo']['street']}, ${widget.snap['deliveryInfo']['locality']}, ${widget.snap['deliveryInfo']['city']}, ${widget.snap['deliveryInfo']['country']} - ${widget.snap['deliveryInfo']['zip']}",
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w500,
-                            color: darkColor,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  6.heightBox,
-                  Row(
-                    children: [
-                      const Text(
-                        "Phone: ",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: darkTextGreyColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                      Text(
-                        "${widget.snap['deliveryInfo']['phone']}",
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: darkColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
-                  6.heightBox,
-                  Row(
-                    children: [
-                      const Text(
-                        "Name: ",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: darkTextGreyColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                      Text(
-                        widget.snap['deliveryInfo']['name'],
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: darkColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
-                  6.heightBox,
-                  Row(
-                    children: [
-                      const Text(
-                        "Type: ",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: darkTextGreyColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                      Text(
-                        widget.snap['deliveryInfo']['title'],
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: primaryColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-
-              widget.snap['is_pickup'] ? Container() : 4.heightBox,
-              widget.snap['is_pickup'] ? Container() : const Divider(),
-              4.heightBox,
-              // Update Info Card
-              Column(
-                children: [
-                  const Text(
-                    "Update Info",
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      color: darkColor,
-                      fontSize: 20,
-                    ),
-                  ),
-                  8.heightBox,
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const Text(
-                        "Update Order Status: ",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: darkTextGreyColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                      8.heightBox,
-                      RadioListTile(
-                        title: const Text(
-                          "In Process",
-                          style: TextStyle(
-                            fontWeight: FontWeight.w500,
-                            color: blueColor,
-                            fontSize: 16,
-                          ),
-                        ),
-                        value: 0,
-                        groupValue: _selectedOrderOption,
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedOrderOption = value;
-                          });
-                        },
-                        activeColor: blueColor,
-                      ),
-                      RadioListTile(
-                        title: const Text(
-                          "Completed ",
-                          style: TextStyle(
-                            fontWeight: FontWeight.w500,
-                            color: greenColor,
-                            fontSize: 16,
-                          ),
-                        ),
-                        value: 1,
-                        groupValue: _selectedOrderOption,
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedOrderOption = value;
-                          });
-                        },
-                        activeColor: greenColor,
-                      ),
-                      RadioListTile(
-                        title: const Text(
-                          "Cancelled",
-                          style: TextStyle(
-                            fontWeight: FontWeight.w500,
-                            color: redColor,
-                            fontSize: 16,
-                          ),
-                        ),
-                        value: 2,
-                        groupValue: _selectedOrderOption,
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedOrderOption = value;
-                          });
-                        },
-                        activeColor: redColor,
-                      ),
-
-                      16.heightBox,
-                      // for payment
-                      const Text(
-                        "Update Payment Status: ",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: darkTextGreyColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                      RadioListTile(
-                        title: const Text(
-                          "Unpaid",
-                          style: TextStyle(
-                            fontWeight: FontWeight.w500,
-                            color: redColor,
-                            fontSize: 16,
-                          ),
-                        ),
-                        value: false,
-                        groupValue: _selectedPaymentOption,
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedPaymentOption = value;
-                          });
-                        },
-                        activeColor: redColor,
-                      ),
-                      RadioListTile(
-                        title: const Text(
-                          "Paid",
-                          style: TextStyle(
-                            fontWeight: FontWeight.w500,
-                            color: greenColor,
-                            fontSize: 16,
-                          ),
-                        ),
-                        value: true,
-                        groupValue: _selectedPaymentOption,
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedPaymentOption = value;
-                          });
-                        },
-                        activeColor: greenColor,
-                      ),
-
-                      12.heightBox,
-                      // button
-                      !_isLoading ? CustomButton(
-                        btnText: "Update Order",
-                        onTap: updateOrder,
-                      ) : const Center(child: CircularProgressIndicator(color: primaryColor,)),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 }

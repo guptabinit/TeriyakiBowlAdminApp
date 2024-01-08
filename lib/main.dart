@@ -12,9 +12,12 @@ import 'package:flutter_background_service_android/flutter_background_service_an
     show AndroidServiceInstance;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:teriyaki_bowl_admin_app/views/onboarding/splash_screen.dart';
 
 import 'utils/colors.dart';
+
+SharedPreferences? preferences;
 
 Future<void> _firebaseMessagingBackgroundHandler(
   RemoteMessage message,
@@ -24,6 +27,8 @@ Future<void> _firebaseMessagingBackgroundHandler(
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  preferences = await SharedPreferences.getInstance();
 
   final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
