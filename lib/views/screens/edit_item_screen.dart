@@ -383,6 +383,20 @@ class _EditItemScreenState extends State<EditItemScreen> {
                         varients.removeAt(index);
                       });
                     },
+                    onUpdateVarientName: (name, index) {
+                      final oldValue = varients[index];
+                      varients[index] = const Varient().copyWith(
+                        varientName: name,
+                        varientPrice: oldValue?.varientPrice ?? 0,
+                      );
+                    },
+                    onUpdateVarientPrice: (price, index) {
+                      final oldValue = varients[index];
+                      varients[index] = const Varient().copyWith(
+                        varientName: oldValue?.varientName ?? '',
+                        varientPrice: price,
+                      );
+                    },
                   ),
                 20.heightBox,
                 CheckboxListTile(
@@ -411,6 +425,20 @@ class _EditItemScreenState extends State<EditItemScreen> {
                       setState(() {
                         addons.removeAt(index);
                       });
+                    },
+                    onUpdateAddonName: (name, index) {
+                      final oldValue = addons[index];
+                      addons[index] = const Addon().copyWith(
+                        addonName: name,
+                        addonPrice: oldValue?.addonPrice ?? 0,
+                      );
+                    },
+                    onUpdateAddonPrice: (price, index) {
+                      final oldValue = addons[index];
+                      addons[index] = const Addon().copyWith(
+                        addonName: oldValue?.addonName ?? '',
+                        addonPrice: price,
+                      );
                     },
                   ),
                 20.heightBox,
@@ -441,6 +469,11 @@ class _EditItemScreenState extends State<EditItemScreen> {
                         removals.removeAt(index);
                       });
                     },
+                    onChanged: (index, value) {
+                      removals[index] = const Removal().copyWith(
+                        removalName: value,
+                      );
+                    },
                   ),
                 20.heightBox,
                 CheckboxListTile(
@@ -467,6 +500,20 @@ class _EditItemScreenState extends State<EditItemScreen> {
                     onQuantityRemovePressed: (index) {
                       quantities.removeAt(index);
                       setState(() {});
+                    },
+                    onUpdateQtyName: (String name, int index) {
+                      final oldValue = quantities[index];
+                      quantities[index] = const Quantity().copyWith(
+                        quantity: name,
+                        quantityPrice: oldValue?.quantityPrice ?? 0,
+                      );
+                    },
+                    onUpdateQtyPrice: (double price, int index) {
+                      final oldValue = quantities[index];
+                      quantities[index] = const Quantity().copyWith(
+                        quantity: oldValue?.quantity ?? '',
+                        quantityPrice: price,
+                      );
                     },
                   ),
                 20.heightBox,
@@ -561,11 +608,15 @@ class DynamicVarientItem extends StatelessWidget {
     required this.index,
     required this.varient,
     required this.onRemovePressed,
+    required this.onUpdateVarientName,
+    required this.onUpdateVarientPrice,
   });
 
   final int index;
   final Varient? varient;
   final void Function()? onRemovePressed;
+  final Function(String name, int index) onUpdateVarientName;
+  final Function(double price, int index) onUpdateVarientPrice;
 
   @override
   Widget build(BuildContext context) {
@@ -598,19 +649,28 @@ class DynamicVarientItem extends StatelessWidget {
                 CustomTextField(
                   controller: varientNameController,
                   labelText: 'Varient name',
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.digitsOnly,
-                  ],
+                  onChanged: (value) {
+                    onUpdateVarientName(value ?? '', index);
+                  },
                 ),
                 8.heightBox,
                 CustomTextField(
                   controller: varientPriceController,
                   labelText: 'Varient price',
-                  keyboardType: TextInputType.number,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                   inputFormatters: [
-                    FilteringTextInputFormatter.digitsOnly,
+                    FilteringTextInputFormatter.allow(
+                      RegExp(r'^\d+\.?\d{0,2}'),
+                    ),
                   ],
+                  onChanged: (value) {
+                    onUpdateVarientPrice(
+                      double.tryParse(value ?? '') ?? 0,
+                      index,
+                    );
+                  },
                 ),
                 6.heightBox,
               ],
@@ -628,11 +688,15 @@ class ItemQuantityWidget extends StatelessWidget {
     this.quantity = const [],
     required this.onNewQuantityPressed,
     required this.onQuantityRemovePressed,
+    required this.onUpdateQtyName,
+    required this.onUpdateQtyPrice,
   });
 
   final List<Quantity?> quantity;
   final void Function()? onNewQuantityPressed;
   final void Function(int index) onQuantityRemovePressed;
+  final Function(String name, int index) onUpdateQtyName;
+  final Function(double price, int index) onUpdateQtyPrice;
 
   @override
   Widget build(BuildContext context) {
@@ -647,6 +711,8 @@ class ItemQuantityWidget extends StatelessWidget {
                 onRemovePressed: () {
                   onQuantityRemovePressed(index);
                 },
+                onUpdateQtyName: onUpdateQtyName,
+                onUpdateQtyPrice: onUpdateQtyPrice,
               ),
             )
             .toList(),
@@ -666,11 +732,15 @@ class DynamicQuantityItem extends StatelessWidget {
     this.quantity,
     required this.index,
     required this.onRemovePressed,
+    required this.onUpdateQtyName,
+    required this.onUpdateQtyPrice,
   });
 
   final Quantity? quantity;
   final int index;
   final void Function()? onRemovePressed;
+  final Function(String name, int index) onUpdateQtyName;
+  final Function(double price, int index) onUpdateQtyPrice;
 
   @override
   Widget build(BuildContext context) {
@@ -703,19 +773,28 @@ class DynamicQuantityItem extends StatelessWidget {
                 CustomTextField(
                   controller: quantityNameController,
                   labelText: 'Quantity name',
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.digitsOnly,
-                  ],
+                  onChanged: (value) {
+                    onUpdateQtyName(value ?? '', index);
+                  },
                 ),
                 8.heightBox,
                 CustomTextField(
                   controller: quantityPriceController,
                   labelText: 'Quantity price',
-                  keyboardType: TextInputType.number,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                   inputFormatters: [
-                    FilteringTextInputFormatter.digitsOnly,
+                    FilteringTextInputFormatter.allow(
+                      RegExp(r'^\d+\.?\d{0,2}'),
+                    ),
                   ],
+                  onChanged: (value) {
+                    onUpdateQtyPrice(
+                      double.tryParse(value ?? '0') ?? 0,
+                      index,
+                    );
+                  },
                 ),
                 6.heightBox,
               ],
@@ -733,11 +812,15 @@ class ItemVarientWidget extends StatelessWidget {
     this.varients = const [],
     required this.onNewVarientPressed,
     required this.onVarientRemovePressed,
+    required this.onUpdateVarientName,
+    required this.onUpdateVarientPrice,
   });
 
   final List<Varient?> varients;
   final void Function()? onNewVarientPressed;
   final void Function(int index) onVarientRemovePressed;
+  final Function(String name, int index) onUpdateVarientName;
+  final Function(double price, int index) onUpdateVarientPrice;
 
   @override
   Widget build(BuildContext context) {
@@ -752,6 +835,8 @@ class ItemVarientWidget extends StatelessWidget {
                 onRemovePressed: () {
                   onVarientRemovePressed(index);
                 },
+                onUpdateVarientPrice: onUpdateVarientPrice,
+                onUpdateVarientName: onUpdateVarientName,
               ),
             )
             .toList(),
@@ -771,11 +856,15 @@ class DynamicAddonItem extends StatelessWidget {
     this.addon,
     required this.index,
     required this.onRemovePressed,
+    required this.onUpdateAddonName,
+    required this.onUpdateAddonPrice,
   });
 
   final Addon? addon;
   final int index;
   final void Function()? onRemovePressed;
+  final void Function(String name, int index) onUpdateAddonName;
+  final void Function(double price, int index) onUpdateAddonPrice;
 
   @override
   Widget build(BuildContext context) {
@@ -809,19 +898,31 @@ class DynamicAddonItem extends StatelessWidget {
                 CustomTextField(
                   controller: addonNameController,
                   labelText: 'Addon name',
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.digitsOnly,
-                  ],
+                  onChanged: (value) {
+                    onUpdateAddonName(
+                      value ?? '',
+                      index,
+                    );
+                  },
                 ),
                 8.heightBox,
                 CustomTextField(
                   controller: addonPriceController,
                   labelText: 'Addon price',
-                  keyboardType: TextInputType.number,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                   inputFormatters: [
-                    FilteringTextInputFormatter.digitsOnly,
+                    FilteringTextInputFormatter.allow(
+                      RegExp(r'^\d+\.?\d{0,2}'),
+                    ),
                   ],
+                  onChanged: (value) {
+                    onUpdateAddonPrice(
+                      double.tryParse(value ?? '0') ?? 0,
+                      index,
+                    );
+                  },
                 ),
                 6.heightBox,
               ],
@@ -839,11 +940,15 @@ class ItemAddonWidget extends StatelessWidget {
     this.addons = const [],
     required this.onNewAddonPressed,
     required this.onAddonRemovePressed,
+    required this.onUpdateAddonName,
+    required this.onUpdateAddonPrice,
   });
 
   final List<Addon?> addons;
   final void Function()? onNewAddonPressed;
   final void Function(int index) onAddonRemovePressed;
+  final Function(String name, int index) onUpdateAddonName;
+  final Function(double price, int index) onUpdateAddonPrice;
 
   @override
   Widget build(BuildContext context) {
@@ -858,6 +963,8 @@ class ItemAddonWidget extends StatelessWidget {
                 onRemovePressed: () {
                   onAddonRemovePressed(index);
                 },
+                onUpdateAddonName: onUpdateAddonName,
+                onUpdateAddonPrice: onUpdateAddonPrice,
               ),
             )
             .toList(),
@@ -877,11 +984,13 @@ class DynamicRemovalItem extends StatelessWidget {
     this.removal,
     required this.index,
     required this.onRemovePressed,
+    this.onChanged,
   });
 
   final Removal? removal;
   final int index;
   final void Function()? onRemovePressed;
+  final Function(String?)? onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -915,6 +1024,7 @@ class DynamicRemovalItem extends StatelessWidget {
                   inputFormatters: [
                     FilteringTextInputFormatter.digitsOnly,
                   ],
+                  onChanged: onChanged,
                 ),
               ],
             ),
@@ -931,11 +1041,13 @@ class ItemRemovalWidget extends StatelessWidget {
     this.removals = const [],
     required this.onNewRemovalPressed,
     required this.onRemovalRemovePressed,
+    required this.onChanged,
   });
 
   final List<Removal?> removals;
   final void Function()? onNewRemovalPressed;
   final void Function(int index) onRemovalRemovePressed;
+  final Function(int index, String value) onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -949,6 +1061,9 @@ class ItemRemovalWidget extends StatelessWidget {
                 index: index,
                 onRemovePressed: () {
                   onRemovalRemovePressed(index);
+                },
+                onChanged: (value) {
+                  onChanged(index, value ?? '');
                 },
               ),
             )

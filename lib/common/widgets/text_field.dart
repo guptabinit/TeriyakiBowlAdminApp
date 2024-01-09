@@ -16,6 +16,7 @@ class CustomTextField extends StatelessWidget {
   final FontWeight fontWeight;
   final int? maxLength;
   final List<TextInputFormatter>? inputFormatters;
+  final Function(String?)? onChanged;
 
   const CustomTextField({
     super.key,
@@ -32,6 +33,7 @@ class CustomTextField extends StatelessWidget {
     this.maxLength,
     Function()? onEditingCompleted,
     this.inputFormatters,
+    this.onChanged,
   });
 
   @override
@@ -59,6 +61,7 @@ class CustomTextField extends StatelessWidget {
         border: const OutlineInputBorder(),
       ),
       inputFormatters: inputFormatters,
+      onChanged: onChanged,
     );
   }
 }

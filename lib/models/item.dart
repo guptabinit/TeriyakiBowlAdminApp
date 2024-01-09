@@ -3,7 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'item.freezed.dart';
 part 'item.g.dart';
 
-@freezed
+@Freezed(copyWith: true)
 class Item with _$Item {
   const factory Item({
     @JsonKey(name: 'addon_avail') bool? addonAvail,
@@ -27,7 +27,7 @@ class Item with _$Item {
   factory Item.fromJson(Map<String, Object?> json) => _$ItemFromJson(json);
 }
 
-@freezed
+@Freezed(copyWith: true)
 class Quantity with _$Quantity {
   const factory Quantity({
     String? quantity,
@@ -38,7 +38,7 @@ class Quantity with _$Quantity {
       _$QuantityFromJson(json);
 }
 
-@freezed
+@Freezed(copyWith: true)
 class Addon with _$Addon {
   const factory Addon({
     String? addonName,
@@ -48,7 +48,7 @@ class Addon with _$Addon {
   factory Addon.fromJson(Map<String, Object?> json) => _$AddonFromJson(json);
 }
 
-@freezed
+@Freezed(copyWith: true)
 class Removal with _$Removal {
   const factory Removal({
     @JsonKey(name: 'removalname') String? removalName,
@@ -58,7 +58,7 @@ class Removal with _$Removal {
       _$RemovalFromJson(json);
 }
 
-@freezed
+@Freezed(copyWith: true)
 class Varient with _$Varient {
   const factory Varient({
     @JsonKey(name: 'varient_name') String? varientName,
