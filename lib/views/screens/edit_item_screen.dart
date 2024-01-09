@@ -620,12 +620,12 @@ class DynamicVarientItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final varientNameController = TextEditingController(
-      text: varient?.varientName ?? '',
-    );
-    final varientPriceController = TextEditingController(
-      text: '${varient?.varientPrice ?? ''}',
-    );
+    // final varientNameController = TextEditingController(
+    //   text: varient?.varientName ?? '',
+    // );
+    // final varientPriceController = TextEditingController(
+    //   text: '${varient?.varientPrice ?? ''}',
+    // );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -647,7 +647,8 @@ class DynamicVarientItem extends StatelessWidget {
                   ),
                 ),
                 CustomTextField(
-                  controller: varientNameController,
+                  // controller: varientNameController,
+                  initialValue: varient?.varientName ?? '',
                   labelText: 'Varient name',
                   onChanged: (value) {
                     onUpdateVarientName(value ?? '', index);
@@ -655,7 +656,8 @@ class DynamicVarientItem extends StatelessWidget {
                 ),
                 8.heightBox,
                 CustomTextField(
-                  controller: varientPriceController,
+                  // controller: varientPriceController,
+                  initialValue: '${varient?.varientPrice ?? ''}',
                   labelText: 'Varient price',
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
@@ -744,12 +746,12 @@ class DynamicQuantityItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final quantityNameController = TextEditingController(
-      text: quantity?.quantity ?? '',
-    );
-    final quantityPriceController = TextEditingController(
-      text: '${quantity?.quantityPrice ?? ''}',
-    );
+    // final quantityNameController = TextEditingController(
+    //   text: quantity?.quantity ?? '',
+    // );
+    // final quantityPriceController = TextEditingController(
+    //   text: '${quantity?.quantityPrice ?? ''}',
+    // );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -771,7 +773,8 @@ class DynamicQuantityItem extends StatelessWidget {
                   ),
                 ),
                 CustomTextField(
-                  controller: quantityNameController,
+                  // controller: quantityNameController,
+                  initialValue: quantity?.quantity ?? '',
                   labelText: 'Quantity name',
                   onChanged: (value) {
                     onUpdateQtyName(value ?? '', index);
@@ -779,7 +782,8 @@ class DynamicQuantityItem extends StatelessWidget {
                 ),
                 8.heightBox,
                 CustomTextField(
-                  controller: quantityPriceController,
+                  // controller: quantityPriceController,
+                  initialValue: '${quantity?.quantityPrice ?? ''}',
                   labelText: 'Quantity price',
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
@@ -868,12 +872,12 @@ class DynamicAddonItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final addonNameController = TextEditingController(
-      text: addon?.addonName ?? '',
-    );
-    final addonPriceController = TextEditingController(
-      text: '${addon?.addonPrice ?? ''}',
-    );
+    // final addonNameController = TextEditingController(
+    //   text: addon?.addonName ?? '',
+    // );
+    // final addonPriceController = TextEditingController(
+    //   text: '${addon?.addonPrice ?? ''}',
+    // );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -896,7 +900,8 @@ class DynamicAddonItem extends StatelessWidget {
                   ),
                 ),
                 CustomTextField(
-                  controller: addonNameController,
+                  // controller: addonNameController,
+                  initialValue: addon?.addonName ?? '',
                   labelText: 'Addon name',
                   onChanged: (value) {
                     onUpdateAddonName(
@@ -907,7 +912,8 @@ class DynamicAddonItem extends StatelessWidget {
                 ),
                 8.heightBox,
                 CustomTextField(
-                  controller: addonPriceController,
+                  // controller: addonPriceController,
+                  initialValue: '${addon?.addonPrice ?? ''}',
                   labelText: 'Addon price',
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
@@ -994,9 +1000,9 @@ class DynamicRemovalItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final removalNameController = TextEditingController(
-      text: removal?.removalName ?? '',
-    );
+    // final removalNameController = TextEditingController(
+    //   text: removal?.removalName ?? '',
+    // );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -1018,7 +1024,8 @@ class DynamicRemovalItem extends StatelessWidget {
                   ),
                 ),
                 CustomTextField(
-                  controller: removalNameController,
+                  // controller: removalNameController,
+                  initialValue: removal?.removalName ?? '',
                   labelText: 'Removal name',
                   keyboardType: TextInputType.number,
                   inputFormatters: [

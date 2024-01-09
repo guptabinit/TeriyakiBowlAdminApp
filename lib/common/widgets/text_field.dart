@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import '../../utils/colors.dart';
 
 class CustomTextField extends StatelessWidget {
-  final TextEditingController controller;
+  final TextEditingController? controller;
   final String labelText;
   final String hintText;
   final int? maxLines;
@@ -17,10 +17,11 @@ class CustomTextField extends StatelessWidget {
   final int? maxLength;
   final List<TextInputFormatter>? inputFormatters;
   final Function(String?)? onChanged;
+  final String? initialValue;
 
   const CustomTextField({
     super.key,
-    required this.controller,
+    this.controller,
     required this.labelText,
     this.hintText = "",
     this.maxLines = 1,
@@ -34,11 +35,13 @@ class CustomTextField extends StatelessWidget {
     Function()? onEditingCompleted,
     this.inputFormatters,
     this.onChanged,
+    this.initialValue,
   });
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      initialValue: initialValue,
       controller: controller,
       keyboardType: keyboardType,
       readOnly: isDisabled,
