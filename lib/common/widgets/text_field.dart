@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../utils/colors.dart';
 
-class CustomTextField extends StatefulWidget {
-  final TextEditingController controller;
+class CustomTextField extends StatelessWidget {
+  final TextEditingController? controller;
   final String labelText;
   final String hintText;
   final int? maxLines;
@@ -14,9 +15,13 @@ class CustomTextField extends StatefulWidget {
   final bool isDisabled;
   final FontWeight fontWeight;
   final int? maxLength;
+  final List<TextInputFormatter>? inputFormatters;
+  final Function(String?)? onChanged;
+  final String? initialValue;
 
-  const CustomTextField({super.key,
-    required this.controller,
+  const CustomTextField({
+    super.key,
+    this.controller,
     required this.labelText,
     this.hintText = "",
     this.maxLines = 1,
@@ -28,38 +33,38 @@ class CustomTextField extends StatefulWidget {
     this.fontWeight = FontWeight.normal,
     this.maxLength,
     Function()? onEditingCompleted,
+    this.inputFormatters,
+    this.onChanged,
+    this.initialValue,
   });
 
   @override
-  State<CustomTextField> createState() => _CustomTextFieldState();
-}
-
-class _CustomTextFieldState extends State<CustomTextField> {
-
-  @override
   Widget build(BuildContext context) {
-    return TextField(
-      controller: widget.controller,
-      keyboardType: widget.keyboardType,
-      readOnly: widget.isDisabled,
-      obscureText: widget.isPass,
-      maxLines: widget.maxLines,
-      maxLength: widget.maxLength,
+    return TextFormField(
+      initialValue: initialValue,
+      controller: controller,
+      keyboardType: keyboardType,
+      readOnly: isDisabled,
+      obscureText: isPass,
+      maxLines: maxLines,
+      maxLength: maxLength,
       decoration: InputDecoration(
-          labelText: widget.labelText,
-          hintText: widget.hintText,
-          labelStyle: TextStyle(
-              color: widget.textColor,
-              fontWeight: widget.fontWeight
-          ),
-          hintStyle: TextStyle(
-              color: widget.textColor,
-              fontWeight: widget.fontWeight
-          ),
-          suffixIcon: widget.suffixIcon,
-          contentPadding: const EdgeInsets.all(12),
-          border: const OutlineInputBorder()
+        labelText: labelText,
+        hintText: hintText,
+        labelStyle: TextStyle(
+          color: textColor,
+          fontWeight: fontWeight,
+        ),
+        hintStyle: TextStyle(
+          color: textColor,
+          fontWeight: fontWeight,
+        ),
+        suffixIcon: suffixIcon,
+        contentPadding: const EdgeInsets.all(12),
+        border: const OutlineInputBorder(),
       ),
+      inputFormatters: inputFormatters,
+      onChanged: onChanged,
     );
   }
 }
