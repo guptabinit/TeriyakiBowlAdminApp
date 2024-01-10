@@ -10,6 +10,7 @@ import 'package:teriyaki_bowl_admin_app/common/components/button.dart';
 import 'package:teriyaki_bowl_admin_app/common/widgets/text_field.dart';
 import 'package:teriyaki_bowl_admin_app/models/item.dart';
 import 'package:teriyaki_bowl_admin_app/utils/colors.dart';
+import 'package:teriyaki_bowl_admin_app/views/home/home_screen.dart';
 import 'package:velocity_x/velocity_x.dart';
 
 class EditItemScreen extends StatefulWidget {
@@ -195,8 +196,9 @@ class _EditItemScreenState extends State<EditItemScreen> {
       appBar: AppBar(
         title: Text(
           isLoading ? '' : item?.itemName ?? '',
-          style: const TextStyle(color: Colors.white),
+          style: const TextStyle(color: Colors.white, fontSize: 16),
         ),
+        centerTitle: true,
         backgroundColor: primaryColor,
         iconTheme: const IconThemeData(
           color: Colors.white,
@@ -535,7 +537,7 @@ class _EditItemScreenState extends State<EditItemScreen> {
                             );
                           }
                           if (isUpdated) {
-                            Get.back();
+                            Get.offAll(() => const HomeScreen());
                             Get.snackbar(
                               'Updated',
                               'Item updated succeed',
