@@ -11,7 +11,7 @@ import 'package:teriyaki_bowl_admin_app/common/widgets/text_field.dart';
 import 'package:teriyaki_bowl_admin_app/models/category.dart';
 import 'package:teriyaki_bowl_admin_app/models/item.dart';
 import 'package:teriyaki_bowl_admin_app/utils/colors.dart';
-import 'package:teriyaki_bowl_admin_app/views/home/home_screen.dart';
+import 'package:teriyaki_bowl_admin_app/views/screens/categories_page.dart';
 import 'package:velocity_x/velocity_x.dart';
 
 class EditItemScreen extends StatefulWidget {
@@ -39,7 +39,8 @@ class _EditItemScreenState extends State<EditItemScreen> {
   late TextEditingController priceController;
   late TextEditingController subCategoryController;
   late TextEditingController prepTimeController;
-  late TextEditingController totalOrderController;
+
+  // late TextEditingController totalOrderController;
 
   var isLoading = true;
   var isError = false;
@@ -69,7 +70,7 @@ class _EditItemScreenState extends State<EditItemScreen> {
     priceController = TextEditingController();
     subCategoryController = TextEditingController();
     prepTimeController = TextEditingController();
-    totalOrderController = TextEditingController();
+    // totalOrderController = TextEditingController();
 
     loadItemData(widget.itemId);
 
@@ -83,7 +84,7 @@ class _EditItemScreenState extends State<EditItemScreen> {
     priceController.dispose();
     subCategoryController.dispose();
     prepTimeController.dispose();
-    totalOrderController.dispose();
+    // totalOrderController.dispose();
 
     super.dispose();
   }
@@ -94,6 +95,22 @@ class _EditItemScreenState extends State<EditItemScreen> {
     isUpdateFailed = false;
     updateErrorMessage = null;
     setState(() {});
+
+    if (descriptionController.text.isEmpty ||
+        nameController.text.isEmpty ||
+        priceController.text.isEmpty ||
+        prepTimeController.text.isEmpty) {
+      Get.snackbar(
+        'Fields are required',
+        'Please fill all the required fields',
+        colorText: Colors.white,
+        backgroundColor: Colors.red,
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(10.0),
+      );
+      return;
+    }
+
     try {
       final data = <String, dynamic>{
         'item_description': descriptionController.text,
@@ -101,7 +118,7 @@ class _EditItemScreenState extends State<EditItemScreen> {
         'item_price': double.tryParse(priceController.text) ?? 0,
         'item_sub_category': subCategoryController.text,
         'prep_time': double.tryParse(prepTimeController.text) ?? 0,
-        'total_order': double.tryParse(totalOrderController.text) ?? 0,
+        // 'total_order': double.tryParse(totalOrderController.text) ?? 0,
       };
 
       if (isQuantityAvailable) {
@@ -181,12 +198,31 @@ class _EditItemScreenState extends State<EditItemScreen> {
       isUpdated = true;
       isUpdateFailed = false;
       updateErrorMessage = null;
+
+      Get.offAll(() => const CategoriesScreen());
+      Get.snackbar(
+        'Updated',
+        'Item updated succeed',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        margin: const EdgeInsets.all(10),
+      );
+
       setState(() {});
     } catch (e) {
       isUpdating = false;
       isUpdated = false;
       isUpdateFailed = true;
       updateErrorMessage = 'Something went wrong!';
+
+      Get.snackbar(
+        'Update failed',
+        'Item updated failed',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        margin: const EdgeInsets.all(10),
+      );
+
       setState(() {});
     }
   }
@@ -362,24 +398,24 @@ class _EditItemScreenState extends State<EditItemScreen> {
                     ),
                   ],
                 ),
-                20.heightBox,
-                Text(
-                  'Total Order',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.labelLarge?.copyWith(
-                        fontSize: 16,
-                      ),
-                ),
-                6.heightBox,
-                CustomTextField(
-                  controller: totalOrderController,
-                  labelText: 'Total Order',
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.digitsOnly,
-                  ],
-                ),
+                // 20.heightBox,
+                // Text(
+                //   'Total Order',
+                //   style: Theme.of(
+                //     context,
+                //   ).textTheme.labelLarge?.copyWith(
+                //         fontSize: 16,
+                //       ),
+                // ),
+                // 6.heightBox,
+                // CustomTextField(
+                //   controller: totalOrderController,
+                //   labelText: 'Total Order',
+                //   keyboardType: TextInputType.number,
+                //   inputFormatters: [
+                //     FilteringTextInputFormatter.digitsOnly,
+                //   ],
+                // ),
                 20.heightBox,
                 CheckboxListTile(
                   value: isVarientAvailable,
@@ -550,25 +586,6 @@ class _EditItemScreenState extends State<EditItemScreen> {
                         btnText: 'Update',
                         onTap: () async {
                           await _updateItem();
-                          if (isUpdateFailed) {
-                            Get.snackbar(
-                              'Update failed',
-                              'Item updated failed',
-                              snackPosition: SnackPosition.BOTTOM,
-                              backgroundColor: Colors.red,
-                              margin: const EdgeInsets.all(10),
-                            );
-                          }
-                          if (isUpdated) {
-                            Get.offAll(() => const HomeScreen());
-                            Get.snackbar(
-                              'Updated',
-                              'Item updated succeed',
-                              snackPosition: SnackPosition.BOTTOM,
-                              backgroundColor: Colors.green,
-                              margin: const EdgeInsets.all(10),
-                            );
-                          }
                         },
                       ),
                 20.heightBox,
@@ -611,7 +628,7 @@ class _EditItemScreenState extends State<EditItemScreen> {
       priceController.text = '${item.itemPrice}';
       subCategoryController.text = item.itemSubCategory ?? '';
       prepTimeController.text = '${item.prepTime}';
-      totalOrderController.text = '${item.totalOrder}';
+      // totalOrderController.text = '${item.totalOrder}';
       isVarientAvailable = item.varientAvail ?? false;
       isAddonsAvailable = item.addonAvail ?? false;
       isRemovalsAvailable = item.removalAvail ?? false;

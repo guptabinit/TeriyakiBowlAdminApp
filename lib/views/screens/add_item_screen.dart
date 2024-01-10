@@ -35,7 +35,8 @@ class _AddItemScreenState extends State<AddItemScreen> {
   late TextEditingController priceController;
   late TextEditingController subCategoryController;
   late TextEditingController prepTimeController;
-  late TextEditingController totalOrderController;
+
+  // late TextEditingController totalOrderController;
 
   Item? item;
 
@@ -62,7 +63,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
     priceController = TextEditingController();
     subCategoryController = TextEditingController();
     prepTimeController = TextEditingController();
-    totalOrderController = TextEditingController();
+    // totalOrderController = TextEditingController();
 
     super.initState();
   }
@@ -74,12 +75,27 @@ class _AddItemScreenState extends State<AddItemScreen> {
     priceController.dispose();
     subCategoryController.dispose();
     prepTimeController.dispose();
-    totalOrderController.dispose();
+    // totalOrderController.dispose();
 
     super.dispose();
   }
 
   Future<void> _createItem() async {
+    if (descriptionController.text.isEmpty ||
+        nameController.text.isEmpty ||
+        priceController.text.isEmpty ||
+        prepTimeController.text.isEmpty) {
+      Get.snackbar(
+        'Fields are required',
+        'Please fill all the required fields',
+        colorText: Colors.white,
+        backgroundColor: Colors.red,
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(10.0),
+      );
+      return;
+    }
+
     isUpdating = true;
     isUpdated = false;
     isUpdateFailed = false;
@@ -92,7 +108,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
         'item_price': double.tryParse(priceController.text) ?? 0,
         'item_sub_category': subCategoryController.text,
         'prep_time': double.tryParse(prepTimeController.text) ?? 0,
-        'total_order': double.tryParse(totalOrderController.text) ?? 0,
+        // 'total_order': double.tryParse(totalOrderController.text) ?? 0,
       };
 
       if (isQuantityAvailable) {
@@ -181,12 +197,31 @@ class _AddItemScreenState extends State<AddItemScreen> {
       isUpdated = true;
       isUpdateFailed = false;
       updateErrorMessage = null;
+
+      Get.back();
+      Get.snackbar(
+        'Created',
+        'Item create succeed',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        margin: const EdgeInsets.all(10),
+      );
+
       setState(() {});
     } catch (e) {
       isUpdating = false;
       isUpdated = false;
       isUpdateFailed = true;
       updateErrorMessage = 'Something went wrong!';
+
+      Get.snackbar(
+        'Create failed',
+        'Item create failed',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        margin: const EdgeInsets.all(10),
+      );
+
       setState(() {});
     }
   }
@@ -339,24 +374,24 @@ class _AddItemScreenState extends State<AddItemScreen> {
                   ),
                 ],
               ),
-              20.heightBox,
-              Text(
-                'Total Order',
-                style: Theme.of(
-                  context,
-                ).textTheme.labelLarge?.copyWith(
-                      fontSize: 16,
-                    ),
-              ),
-              6.heightBox,
-              CustomTextField(
-                controller: totalOrderController,
-                labelText: 'Total Order',
-                keyboardType: TextInputType.number,
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                ],
-              ),
+              // 20.heightBox,
+              // Text(
+              //   'Total Order',
+              //   style: Theme.of(
+              //     context,
+              //   ).textTheme.labelLarge?.copyWith(
+              //         fontSize: 16,
+              //       ),
+              // ),
+              // 6.heightBox,
+              // CustomTextField(
+              //   controller: totalOrderController,
+              //   labelText: 'Total Order',
+              //   keyboardType: TextInputType.number,
+              //   inputFormatters: [
+              //     FilteringTextInputFormatter.digitsOnly,
+              //   ],
+              // ),
               20.heightBox,
               CheckboxListTile(
                 value: isVarientAvailable,
@@ -527,25 +562,6 @@ class _AddItemScreenState extends State<AddItemScreen> {
                       btnText: 'Add',
                       onTap: () async {
                         await _createItem();
-                        if (isUpdateFailed) {
-                          Get.snackbar(
-                            'Create failed',
-                            'Item create failed',
-                            snackPosition: SnackPosition.BOTTOM,
-                            backgroundColor: Colors.red,
-                            margin: const EdgeInsets.all(10),
-                          );
-                        }
-                        if (isUpdated) {
-                          Get.back();
-                          Get.snackbar(
-                            'Created',
-                            'Item create succeed',
-                            snackPosition: SnackPosition.BOTTOM,
-                            backgroundColor: Colors.green,
-                            margin: const EdgeInsets.all(10),
-                          );
-                        }
                       },
                     ),
               20.heightBox,
