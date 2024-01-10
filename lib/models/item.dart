@@ -19,7 +19,7 @@ class Item with _$Item {
     @JsonKey(name: 'quantity') List<Quantity>? quantity,
     @JsonKey(name: 'removal_avail') bool? removalAvail,
     @JsonKey(name: 'removals') List<Removal?>? removals,
-    @JsonKey(name: 'total_order') int? totalOrder,
+    @JsonKey(name: 'total_order') num? totalOrder,
     @JsonKey(name: 'varient_avail') bool? varientAvail,
     @JsonKey(name: 'varients') List<Varient?>? varients,
   }) = _Item;
@@ -61,8 +61,8 @@ class Removal with _$Removal {
 @Freezed(copyWith: true)
 class Varient with _$Varient {
   const factory Varient({
-    @JsonKey(name: 'varient_name') String? varientName,
-    @JsonKey(name: 'varient_price') double? varientPrice,
+    @JsonKey(name: 'varientName') String? varientName,
+    @JsonKey(name: 'varientPrice') double? varientPrice,
   }) = _Varient;
 
   factory Varient.fromJson(Map<String, Object?> json) =>

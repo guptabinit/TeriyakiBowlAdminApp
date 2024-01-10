@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:teriyaki_bowl_admin_app/common/components/button.dart';
 import 'package:teriyaki_bowl_admin_app/common/widgets/text_field.dart';
+import 'package:teriyaki_bowl_admin_app/main.dart';
 import 'package:teriyaki_bowl_admin_app/models/item.dart';
 import 'package:teriyaki_bowl_admin_app/utils/colors.dart';
 import 'package:teriyaki_bowl_admin_app/views/home/home_screen.dart';
@@ -69,6 +70,8 @@ class _EditItemScreenState extends State<EditItemScreen> {
     subCategoryController = TextEditingController();
     prepTimeController = TextEditingController();
     totalOrderController = TextEditingController();
+
+    '${widget.itemId}'.log();
 
     loadItemData(widget.itemId);
 
@@ -219,9 +222,18 @@ class _EditItemScreenState extends State<EditItemScreen> {
               if (isError) ...[
                 const SizedBox(height: 20),
                 Center(
-                  child: Text(
-                    errorMessage ?? '',
-                    style: const TextStyle(color: Colors.white),
+                  child: Column(
+                    children: [
+                      Text(
+                        errorMessage ?? 'Something went wrong!',
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          loadItemData(widget.itemId);
+                        },
+                        child: const Text('Retry'),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -596,6 +608,7 @@ class _EditItemScreenState extends State<EditItemScreen> {
       isLoading = false;
       setState(() {});
     } catch (e) {
+      e.log();
       isLoading = false;
       isError = true;
       errorMessage = e.toString();
@@ -622,12 +635,6 @@ class DynamicVarientItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // final varientNameController = TextEditingController(
-    //   text: varient?.varientName ?? '',
-    // );
-    // final varientPriceController = TextEditingController(
-    //   text: '${varient?.varientPrice ?? ''}',
-    // );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
