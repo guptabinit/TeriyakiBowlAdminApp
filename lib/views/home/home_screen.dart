@@ -8,6 +8,7 @@ import 'package:teriyaki_bowl_admin_app/views/onboarding/login_screen.dart';
 import 'package:teriyaki_bowl_admin_app/views/screens/categories_page.dart';
 import 'package:teriyaki_bowl_admin_app/views/screens/coupon_screen.dart';
 import 'package:teriyaki_bowl_admin_app/views/screens/promotion_screen.dart';
+import 'package:teriyaki_bowl_admin_app/views/screens/receipt_print_screen.dart';
 import 'package:velocity_x/velocity_x.dart';
 
 import '../../common/widgets/text_field.dart';
@@ -27,7 +28,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   TextEditingController taxController = TextEditingController();
 
-  late var tax;
+  late dynamic tax;
 
   @override
   void dispose() {
@@ -181,7 +182,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                       var sharedPref = await SharedPreferences.getInstance();
 
-                      sharedPref.setBool(SplashScreenState.KEYLOGIN, false);
+                      sharedPref.setBool(SplashScreenState.keyLogin, false);
 
                       await getData();
 
@@ -350,6 +351,42 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 12.heightBox,
+                
+                Material(
+                  elevation: 2,
+                  borderRadius: BorderRadius.circular(8),
+                  color: Colors.blue[200],
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(8),
+                    onTap: () {
+                      Get.to(() => const ReceiptPrintPage());
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 24, horizontal: 16),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.print),
+                          8.widthBox,
+                          const Expanded(
+                            child: Text(
+                              'Receipt Print',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: darkColor,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          8.widthBox,
+                          const Icon(Icons.arrow_forward_ios)
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                12.heightBox,
+                
                 Material(
                   elevation: 2,
                   borderRadius: BorderRadius.circular(8),

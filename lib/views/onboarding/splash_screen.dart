@@ -18,8 +18,7 @@ class SplashScreen extends StatefulWidget {
 }
 
 class SplashScreenState extends State<SplashScreen> {
-
-  static const String KEYLOGIN = 'login';
+  static const String keyLogin = 'login';
 
   var adminData = {};
 
@@ -33,24 +32,25 @@ class SplashScreenState extends State<SplashScreen> {
   changeScreen() async {
     var sharedPref = await SharedPreferences.getInstance();
 
-    var isLoggedIn = sharedPref.getBool(KEYLOGIN);
+    var isLoggedIn = sharedPref.getBool(keyLogin);
 
     Future.delayed(const Duration(seconds: 2), () async {
-
-      if(isLoggedIn != null){
-        if(isLoggedIn){
+      if (isLoggedIn != null) {
+        if (isLoggedIn) {
           Get.offAll(() => const HomeScreen());
         } else {
           await getData();
-          Get.offAll(() => LoginScreen(adminData: adminData,));
+          Get.offAll(() => LoginScreen(
+                adminData: adminData,
+              ));
         }
       } else {
         await getData();
-        Get.offAll(() => LoginScreen(adminData: adminData,));
+        Get.offAll(() => LoginScreen(
+              adminData: adminData,
+            ));
       }
-
     });
-
   }
 
   getData() async {
@@ -66,7 +66,7 @@ class SplashScreenState extends State<SplashScreen> {
     }
   }
 
-  Future<void> showSnack(res){
+  Future<void> showSnack(res) {
     return showSnackBar(res, context);
   }
 
@@ -98,9 +98,7 @@ class SplashScreenState extends State<SplashScreen> {
                       const Text(
                         "Admin/Restaurant App",
                         style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold
-                        ),
+                            fontSize: 24, fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
@@ -112,10 +110,7 @@ class SplashScreenState extends State<SplashScreen> {
               24.heightBox,
               const Text(
                 "Powered by JP Digital Agency",
-                style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               24.heightBox
             ],

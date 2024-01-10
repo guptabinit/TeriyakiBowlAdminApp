@@ -14,7 +14,7 @@ pickImage(ImageSource source) async {
 
   XFile? file = await imagePicker.pickImage(source: source);
 
-  if(file != null){
+  if (file != null) {
     return await file.readAsBytes();
   }
 }

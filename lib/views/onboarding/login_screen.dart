@@ -46,7 +46,7 @@ class _LoginScreenState extends State<LoginScreen> {
         if (passwordController.text.length >= 6) {
           if (emailController.text == widget.adminData['email'] &&
               passwordController.text == widget.adminData['password']) {
-            sharedPref.setBool(SplashScreenState.KEYLOGIN, true);
+            sharedPref.setBool(SplashScreenState.keyLogin, true);
 
             final token = await FirebaseMessaging.instance.getToken();
 
