@@ -28,7 +28,7 @@ _$ItemImpl _$$ItemImplFromJson(Map<String, dynamic> json) => _$ItemImpl(
           ?.map((e) =>
               e == null ? null : Removal.fromJson(e as Map<String, dynamic>))
           .toList(),
-      totalOrder: json['total_order'] as int?,
+      totalOrder: json['total_order'] as num?,
       varientAvail: json['varient_avail'] as bool?,
       varients: (json['varients'] as List<dynamic>?)
           ?.map((e) =>
@@ -91,12 +91,12 @@ Map<String, dynamic> _$$RemovalImplToJson(_$RemovalImpl instance) =>
 
 _$VarientImpl _$$VarientImplFromJson(Map<String, dynamic> json) =>
     _$VarientImpl(
-      varientName: json['varient_name'] as String?,
-      varientPrice: (json['varient_price'] as num?)?.toDouble(),
+      varientName: json['varientName'] as String?,
+      varientPrice: (json['varientPrice'] as num?)?.toDouble(),
     );
 
 Map<String, dynamic> _$$VarientImplToJson(_$VarientImpl instance) =>
     <String, dynamic>{
-      'varient_name': instance.varientName,
-      'varient_price': instance.varientPrice,
+      'varientName': instance.varientName,
+      'varientPrice': instance.varientPrice,
     };

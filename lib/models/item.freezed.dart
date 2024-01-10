@@ -47,7 +47,7 @@ mixin _$Item {
   @JsonKey(name: 'removals')
   List<Removal?>? get removals => throw _privateConstructorUsedError;
   @JsonKey(name: 'total_order')
-  int? get totalOrder => throw _privateConstructorUsedError;
+  num? get totalOrder => throw _privateConstructorUsedError;
   @JsonKey(name: 'varient_avail')
   bool? get varientAvail => throw _privateConstructorUsedError;
   @JsonKey(name: 'varients')
@@ -77,7 +77,7 @@ abstract class $ItemCopyWith<$Res> {
       @JsonKey(name: 'quantity') List<Quantity>? quantity,
       @JsonKey(name: 'removal_avail') bool? removalAvail,
       @JsonKey(name: 'removals') List<Removal?>? removals,
-      @JsonKey(name: 'total_order') int? totalOrder,
+      @JsonKey(name: 'total_order') num? totalOrder,
       @JsonKey(name: 'varient_avail') bool? varientAvail,
       @JsonKey(name: 'varients') List<Varient?>? varients});
 }
@@ -168,7 +168,7 @@ class _$ItemCopyWithImpl<$Res, $Val extends Item>
       totalOrder: freezed == totalOrder
           ? _value.totalOrder
           : totalOrder // ignore: cast_nullable_to_non_nullable
-              as int?,
+              as num?,
       varientAvail: freezed == varientAvail
           ? _value.varientAvail
           : varientAvail // ignore: cast_nullable_to_non_nullable
@@ -202,7 +202,7 @@ abstract class _$$ItemImplCopyWith<$Res> implements $ItemCopyWith<$Res> {
       @JsonKey(name: 'quantity') List<Quantity>? quantity,
       @JsonKey(name: 'removal_avail') bool? removalAvail,
       @JsonKey(name: 'removals') List<Removal?>? removals,
-      @JsonKey(name: 'total_order') int? totalOrder,
+      @JsonKey(name: 'total_order') num? totalOrder,
       @JsonKey(name: 'varient_avail') bool? varientAvail,
       @JsonKey(name: 'varients') List<Varient?>? varients});
 }
@@ -290,7 +290,7 @@ class __$$ItemImplCopyWithImpl<$Res>
       totalOrder: freezed == totalOrder
           ? _value.totalOrder
           : totalOrder // ignore: cast_nullable_to_non_nullable
-              as int?,
+              as num?,
       varientAvail: freezed == varientAvail
           ? _value.varientAvail
           : varientAvail // ignore: cast_nullable_to_non_nullable
@@ -396,7 +396,7 @@ class _$ItemImpl implements _Item {
 
   @override
   @JsonKey(name: 'total_order')
-  final int? totalOrder;
+  final num? totalOrder;
   @override
   @JsonKey(name: 'varient_avail')
   final bool? varientAvail;
@@ -500,7 +500,7 @@ abstract class _Item implements Item {
       @JsonKey(name: 'quantity') final List<Quantity>? quantity,
       @JsonKey(name: 'removal_avail') final bool? removalAvail,
       @JsonKey(name: 'removals') final List<Removal?>? removals,
-      @JsonKey(name: 'total_order') final int? totalOrder,
+      @JsonKey(name: 'total_order') final num? totalOrder,
       @JsonKey(name: 'varient_avail') final bool? varientAvail,
       @JsonKey(name: 'varients') final List<Varient?>? varients}) = _$ItemImpl;
 
@@ -547,7 +547,7 @@ abstract class _Item implements Item {
   List<Removal?>? get removals;
   @override
   @JsonKey(name: 'total_order')
-  int? get totalOrder;
+  num? get totalOrder;
   @override
   @JsonKey(name: 'varient_avail')
   bool? get varientAvail;
@@ -1009,9 +1009,9 @@ Varient _$VarientFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$Varient {
-  @JsonKey(name: 'varient_name')
+  @JsonKey(name: 'varientName')
   String? get varientName => throw _privateConstructorUsedError;
-  @JsonKey(name: 'varient_price')
+  @JsonKey(name: 'varientPrice')
   double? get varientPrice => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -1025,8 +1025,8 @@ abstract class $VarientCopyWith<$Res> {
       _$VarientCopyWithImpl<$Res, Varient>;
   @useResult
   $Res call(
-      {@JsonKey(name: 'varient_name') String? varientName,
-      @JsonKey(name: 'varient_price') double? varientPrice});
+      {@JsonKey(name: 'varientName') String? varientName,
+      @JsonKey(name: 'varientPrice') double? varientPrice});
 }
 
 /// @nodoc
@@ -1066,8 +1066,8 @@ abstract class _$$VarientImplCopyWith<$Res> implements $VarientCopyWith<$Res> {
   @override
   @useResult
   $Res call(
-      {@JsonKey(name: 'varient_name') String? varientName,
-      @JsonKey(name: 'varient_price') double? varientPrice});
+      {@JsonKey(name: 'varientName') String? varientName,
+      @JsonKey(name: 'varientPrice') double? varientPrice});
 }
 
 /// @nodoc
@@ -1101,17 +1101,17 @@ class __$$VarientImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$VarientImpl implements _Varient {
   const _$VarientImpl(
-      {@JsonKey(name: 'varient_name') this.varientName,
-      @JsonKey(name: 'varient_price') this.varientPrice});
+      {@JsonKey(name: 'varientName') this.varientName,
+      @JsonKey(name: 'varientPrice') this.varientPrice});
 
   factory _$VarientImpl.fromJson(Map<String, dynamic> json) =>
       _$$VarientImplFromJson(json);
 
   @override
-  @JsonKey(name: 'varient_name')
+  @JsonKey(name: 'varientName')
   final String? varientName;
   @override
-  @JsonKey(name: 'varient_price')
+  @JsonKey(name: 'varientPrice')
   final double? varientPrice;
 
   @override
@@ -1150,17 +1150,17 @@ class _$VarientImpl implements _Varient {
 
 abstract class _Varient implements Varient {
   const factory _Varient(
-          {@JsonKey(name: 'varient_name') final String? varientName,
-          @JsonKey(name: 'varient_price') final double? varientPrice}) =
+          {@JsonKey(name: 'varientName') final String? varientName,
+          @JsonKey(name: 'varientPrice') final double? varientPrice}) =
       _$VarientImpl;
 
   factory _Varient.fromJson(Map<String, dynamic> json) = _$VarientImpl.fromJson;
 
   @override
-  @JsonKey(name: 'varient_name')
+  @JsonKey(name: 'varientName')
   String? get varientName;
   @override
-  @JsonKey(name: 'varient_price')
+  @JsonKey(name: 'varientPrice')
   double? get varientPrice;
   @override
   @JsonKey(ignore: true)

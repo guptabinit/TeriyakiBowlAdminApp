@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:teriyaki_bowl_admin_app/common/components/button.dart';
 import 'package:teriyaki_bowl_admin_app/common/widgets/text_field.dart';
+import 'package:teriyaki_bowl_admin_app/models/category.dart';
 import 'package:teriyaki_bowl_admin_app/models/item.dart';
 import 'package:teriyaki_bowl_admin_app/utils/colors.dart';
 import 'package:velocity_x/velocity_x.dart';
@@ -295,9 +296,23 @@ class _AddItemScreenState extends State<AddItemScreen> {
                     ),
               ),
               6.heightBox,
-              CustomTextField(
-                controller: subCategoryController,
-                labelText: 'Sub Category',
+              DropdownButton(
+                isExpanded: true,
+                value: subCategoryController.text,
+                items: Category.values
+                    .map(
+                      (e) => DropdownMenuItem(
+                        value: e.name,
+                        child: Text(e.name),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (value) {
+                  if (value == null) return;
+                  subCategoryController.text = value;
+                  setState(() {});
+                },
+                hint: const Text('Sub Category'),
               ),
               20.heightBox,
               Text(
@@ -556,12 +571,6 @@ class DynamicVarientItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // final varientNameController = TextEditingController(
-    //   text: varient?.varientName ?? '',
-    // );
-    // final varientPriceController = TextEditingController(
-    //   text: '${varient?.varientPrice ?? ''}',
-    // );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -808,13 +817,6 @@ class DynamicAddonItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // final addonNameController = TextEditingController(
-    //   text: addon?.addonName ?? '',
-    // );
-    // final addonPriceController = TextEditingController(
-    //   text: '${addon?.addonPrice ?? ''}',
-    // );
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
