@@ -4,6 +4,7 @@ import 'package:teriyaki_bowl_admin_app/utils/colors.dart';
 import 'package:teriyaki_bowl_admin_app/views/screens/order_detail_screen.dart';
 import 'package:velocity_x/velocity_x.dart';
 
+import '../../utils/colors.dart';
 
 class OrderTile extends StatefulWidget {
   final dynamic snap;
