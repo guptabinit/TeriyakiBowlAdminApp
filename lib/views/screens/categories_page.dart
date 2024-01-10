@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:teriyaki_bowl_admin_app/views/screens/add_item_screen.dart';
 import 'package:teriyaki_bowl_admin_app/views/screens/product_page.dart';
 import 'package:velocity_x/velocity_x.dart';
 
@@ -17,10 +18,11 @@ class CategoriesScreen extends StatefulWidget {
 class _CategoriesScreenState extends State<CategoriesScreen> {
   bool isLoading = false;
 
-  Widget gridCard(
-      {required String imgUrl,
-      required void Function()? onTap,
-      required String title}) {
+  Widget gridCard({
+    required String imgUrl,
+    required void Function()? onTap,
+    required String title,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Column(
@@ -106,7 +108,9 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
         ),
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              Get.to(() => const AddItemScreen());
+            },
             icon: const Icon(
               Icons.add,
               size: 28,
