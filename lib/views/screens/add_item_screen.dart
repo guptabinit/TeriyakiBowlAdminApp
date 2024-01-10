@@ -169,6 +169,8 @@ class _AddItemScreenState extends State<AddItemScreen> {
           .count()
           .get();
 
+      data['iid'] = totalItem.count + 1;
+
       await FirebaseFirestore.instance
           .collection('items')
           .doc('${totalItem.count + 1}')
