@@ -321,7 +321,11 @@ class _EditItemScreenState extends State<EditItemScreen> {
                 // ),
                 DropdownButton(
                   isExpanded: true,
-                  value: subCategoryController.text,
+                  value: Category.values
+                          .map((e) => e.name)
+                          .contains(subCategoryController.text)
+                      ? subCategoryController.text
+                      : null,
                   items: Category.values
                       .map(
                         (e) => DropdownMenuItem(

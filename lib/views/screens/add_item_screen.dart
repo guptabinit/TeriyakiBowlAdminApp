@@ -298,7 +298,11 @@ class _AddItemScreenState extends State<AddItemScreen> {
               6.heightBox,
               DropdownButton(
                 isExpanded: true,
-                value: subCategoryController.text,
+                value: Category.values
+                        .map((e) => e.name)
+                        .contains(subCategoryController.text)
+                    ? subCategoryController.text
+                    : null,
                 items: Category.values
                     .map(
                       (e) => DropdownMenuItem(
