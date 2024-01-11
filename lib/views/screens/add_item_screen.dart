@@ -84,7 +84,8 @@ class _AddItemScreenState extends State<AddItemScreen> {
     if (descriptionController.text.isEmpty ||
         nameController.text.isEmpty ||
         priceController.text.isEmpty ||
-        prepTimeController.text.isEmpty) {
+        prepTimeController.text.isEmpty ||
+        await File(selectedImage?.path ?? '').exists() == false) {
       Get.snackbar(
         'Fields are required',
         'Please fill all the required fields',
