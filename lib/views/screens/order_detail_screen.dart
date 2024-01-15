@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:teriyaki_bowl_admin_app/common/components/button.dart';
 import 'package:teriyaki_bowl_admin_app/controllers/receipt_print_controller.dart';
 import 'package:teriyaki_bowl_admin_app/resources/firestore_methods.dart';
-import 'package:teriyaki_bowl_admin_app/star_io_10/star_io_10.dart';
 import 'package:teriyaki_bowl_admin_app/utils/utils.dart';
 import 'package:velocity_x/velocity_x.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -24,77 +23,6 @@ class OrderDetailScreen extends StatefulWidget {
 class _OrderDetailScreenState extends State<OrderDetailScreen> {
   int? _selectedOrderOption = 0;
   bool? _selectedPaymentOption = false;
-
-  void _onPrintReceipt() {
-    int totalLength = 48;
-
-    List<String> itemIds = List<String>.from(widget.snap['cart']['items']);
-    Map<String, dynamic> printingData = {
-      'customer_name': widget.snap['name'],
-      'pickup_time': widget.snap['pickup_time'],
-      'order_number': '#${widget.snap['oid']}',
-      'total_items': '${itemIds.length} Items',
-    };
-
-    String subTotal =
-        '\$${widget.snap['cart']['cart_amount'].toStringAsFixed(2)}';
-    printingData.putIfAbsent('sub_total', () {
-      int length = totalLength - (8 + subTotal.length);
-      return 'Subtotal${List.generate((length), (_) => ' ').join()}$subTotal';
-    });
-
-    String tax = '\$${widget.snap['tax_amount'].toStringAsFixed(2)}';
-    printingData.putIfAbsent('tax', () {
-      int length = totalLength - (3 + tax.length);
-      return 'Tax${List.generate((length), (_) => ' ').join()}$tax';
-    });
-    String total = '\$${widget.snap['order_total'].toStringAsFixed(2)}';
-    printingData.putIfAbsent('total', () {
-      int length = totalLength - (5 + total.length);
-      return 'Total${List.generate((length), (_) => ' ').join()}$total';
-    });
-
-    List<Map<String, dynamic>> items = [];
-
-    for (String itemId in itemIds) {
-      dynamic item = widget.snap['cart'][itemId];
-
-      String firstPart = '${item['quantity']} x ${item['item_name']}';
-      String secondPart = '\$${item['total_price'].toStringAsFixed(2)}';
-
-      int length = totalLength - (firstPart.length + secondPart.length);
-
-      String? modifiers = item['selectedAddon'].join(', ');
-
-      items.add({
-        'item':
-            firstPart + List.generate((length), (_) => ' ').join() + secondPart,
-        'modifiers': (modifiers != null && modifiers.isNotEmpty)
-            ? '$modifiers\n------------------------------------------------'
-            : '------------------------------------------------\n',
-      });
-    }
-
-    printingData.putIfAbsent('items', () => items);
-
-    ScaffoldMessengerState state = ScaffoldMessenger.of(context);
-    StarPrinter? printer = ReceiptPrintController.getStarPrinter();
-    if (printer == null) {
-      state
-        ..hideCurrentSnackBar()
-        ..showSnackBar(const SnackBar(content: Text('Printer not found')));
-      return;
-    }
-    StarIO10.print(
-      printer: printer,
-      printingData: printingData,
-      onFailed: (message) {
-        state
-          ..hideCurrentSnackBar()
-          ..showSnackBar(SnackBar(content: Text(message)));
-      },
-    );
-  }
 
   @override
   void initState() {
@@ -1002,7 +930,13 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                         Expanded(
                                           child: CustomButton(
                                             btnText: 'Recepit Print',
-                                            onTap: _onPrintReceipt,
+                                            onTap: () {
+                                              ReceiptPrintController
+                                                  .onPrintReceipt(
+                                                context: context,
+                                                data: widget.snap,
+                                              );
+                                            },
                                           ),
                                         ),
                                       ],
