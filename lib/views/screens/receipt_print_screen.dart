@@ -110,7 +110,7 @@ class _ReceiptPrintPageState extends State<ReceiptPrintPage> {
         itemBuilder: (context, index) {
           StarPrinter printer = printController.printers[index];
 
-          StarPrinter? currentPrinter = ReceiptPrintController.getStarPrinter();
+          StarPrinter? currentPrinter = ReceiptPrintController.starPrinter;
 
           bool connected =
               currentPrinter?.interfaceType == printer.interfaceType &&

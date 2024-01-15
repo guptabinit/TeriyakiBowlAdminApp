@@ -16,7 +16,7 @@ class ReceiptPrintController extends GetxController {
   void onInit() async {
     _printers.value.clear();
     _interfaceType.value = InterfaceType.lan;
-    StarPrinter? printer = ReceiptPrintController.getStarPrinter();
+    StarPrinter? printer = ReceiptPrintController.starPrinter;
     if (printer != null) {
       _printers.update((val) {
         val?.add(printer);
@@ -86,7 +86,84 @@ class ReceiptPrintController extends GetxController {
       ..showSnackBar(SnackBar(content: Text(message)));
   }
 
-  static StarPrinter? getStarPrinter() {
+  static Future<void> onPrintReceipt({
+    BuildContext? context,
+    required dynamic data,
+  }) async {
+    int totalLength = 48;
+
+    List<String> itemIds = List<String>.from(data['cart']['items']);
+    Map<String, dynamic> printingData = {
+      'customer_name': data['name'],
+      'pickup_time': data['pickup_time'],
+      'order_number': '#${data['oid']}',
+      'total_items': '${itemIds.length} Items',
+    };
+
+    String subTotal = '\$${data['cart']['cart_amount'].toStringAsFixed(2)}';
+    printingData.putIfAbsent('sub_total', () {
+      int length = totalLength - (8 + subTotal.length);
+      return 'Subtotal${List.generate((length), (_) => ' ').join()}$subTotal';
+    });
+
+    String tax = '\$${data['tax_amount'].toStringAsFixed(2)}';
+    printingData.putIfAbsent('tax', () {
+      int length = totalLength - (3 + tax.length);
+      return 'Tax${List.generate((length), (_) => ' ').join()}$tax';
+    });
+    String total = '\$${data['order_total'].toStringAsFixed(2)}';
+    printingData.putIfAbsent('total', () {
+      int length = totalLength - (5 + total.length);
+      return 'Total${List.generate((length), (_) => ' ').join()}$total';
+    });
+
+    List<Map<String, dynamic>> items = [];
+
+    for (String itemId in itemIds) {
+      dynamic item = data['cart'][itemId];
+
+      String firstPart = '${item['quantity']} x ${item['item_name']}';
+      String secondPart = '\$${item['total_price'].toStringAsFixed(2)}';
+
+      int length = totalLength - (firstPart.length + secondPart.length);
+
+      String? modifiers = item['selectedAddon'].join(', ');
+
+      items.add({
+        'item':
+            firstPart + List.generate((length), (_) => ' ').join() + secondPart,
+        'modifiers': (modifiers != null && modifiers.isNotEmpty)
+            ? '$modifiers\n------------------------------------------------'
+            : '------------------------------------------------\n',
+      });
+    }
+
+    printingData.putIfAbsent('items', () => items);
+
+    StarPrinter? printer = ReceiptPrintController.starPrinter;
+    if (printer == null) {
+      if (context != null) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(const SnackBar(content: Text('Printer not found')));
+      }
+
+      return;
+    }
+    return StarIO10.print(
+      printer: printer,
+      printingData: printingData,
+      onFailed: (message) {
+        if (context != null) {
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(SnackBar(content: Text(message)));
+        }
+      },
+    );
+  }
+
+  static StarPrinter? get starPrinter {
     String? printerStr = preferences?.getString('starPrinter');
 
     StarPrinter? printer;

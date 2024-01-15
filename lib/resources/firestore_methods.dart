@@ -18,7 +18,8 @@ class FirestoreMethods {
     required context,
   }) async {
     try {
-      String photoUrl = await StorageMethods().uploadImageToStorage(file!, promotionID);
+      String photoUrl =
+          await StorageMethods().uploadImageToStorage(file!, promotionID);
 
       await _firestore.collection('commons').doc('promotions').set({
         promotionID: {
@@ -29,7 +30,8 @@ class FirestoreMethods {
         },
         'promotionNumber': promotionID,
         'promotion_list': FieldValue.arrayUnion([promotionID])
-      }, SetOptions(merge: true)).then((value) => showSnackBar("Promotion added successfully", context));
+      }, SetOptions(merge: true)).then(
+          (value) => showSnackBar("Promotion added successfully", context));
     } catch (e) {
       showSnackBar(e.toString(), context);
     }
@@ -46,7 +48,8 @@ class FirestoreMethods {
   }) async {
     try {
       if (imagePresent) {
-        String photoUrl = await StorageMethods().uploadImageToStorage(file!, promotionID);
+        String photoUrl =
+            await StorageMethods().uploadImageToStorage(file!, promotionID);
 
         await _firestore.collection('commons').doc('promotions').update({
           promotionID: {
@@ -194,5 +197,11 @@ class FirestoreMethods {
     return res;
   }
 
-
+  Future<Map<String, dynamic>?> getOrderById(String oid) {
+    return _firestore
+        .collection('allOrders')
+        .doc(oid)
+        .get()
+        .then((doc) => doc.data());
+  }
 }
