@@ -4,8 +4,6 @@ import 'package:teriyaki_bowl_admin_app/utils/colors.dart';
 import 'package:teriyaki_bowl_admin_app/views/screens/order_detail_screen.dart';
 import 'package:velocity_x/velocity_x.dart';
 
-import '../../utils/colors.dart';
-
 class OrderTile extends StatefulWidget {
   final dynamic snap;
 
@@ -16,24 +14,23 @@ class OrderTile extends StatefulWidget {
 }
 
 class _OrderTileState extends State<OrderTile> {
-
   String orderStatus() {
-    if(widget.snap['order_status'] == 0){
+    if (widget.snap['order_status'] == 0) {
       return "In Process";
-    } else if (widget.snap['order_status'] == 1){
+    } else if (widget.snap['order_status'] == 1) {
       return "Completed";
     }
     return "Cancelled";
   }
+
   Color colorStatus() {
-    if(widget.snap['order_status'] == 0){
+    if (widget.snap['order_status'] == 0) {
       return redColor;
-    } else if (widget.snap['order_status'] == 1){
+    } else if (widget.snap['order_status'] == 1) {
       return greenColor;
     }
     return redColor;
   }
-
 
   // showingSnackbar(String msg){
   //   return showSnackBar(msg, context);
@@ -43,7 +40,9 @@ class _OrderTileState extends State<OrderTile> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Get.to(() => OrderDetailScreen(snap: widget.snap,));
+        Get.to(() => OrderDetailScreen(
+              snap: widget.snap,
+            ));
       },
       child: Container(
         decoration: BoxDecoration(
@@ -124,7 +123,7 @@ class _OrderTileState extends State<OrderTile> {
                   Row(
                     children: [
                       Text(
-                       "\$ ${widget.snap['order_total'].toStringAsFixed(2)}",
+                        "\$ ${widget.snap['order_total'].toStringAsFixed(2)}",
                         style: const TextStyle(
                           fontWeight: FontWeight.w600,
                           color: darkColor,
@@ -161,7 +160,10 @@ class _OrderTileState extends State<OrderTile> {
                 ],
               ),
             ),
-            const Icon(Icons.arrow_forward, color: darkColor,)
+            const Icon(
+              Icons.arrow_forward,
+              color: darkColor,
+            )
           ],
         ),
       ),

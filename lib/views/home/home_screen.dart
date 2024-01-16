@@ -1,9 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:teriyaki_bowl_admin_app/common/widgets/custom_button.dart';
+import 'package:teriyaki_bowl_admin_app/controllers/receipt_print_controller.dart';
+import 'package:teriyaki_bowl_admin_app/main.dart';
 import 'package:teriyaki_bowl_admin_app/views/onboarding/login_screen.dart';
 import 'package:teriyaki_bowl_admin_app/views/screens/categories_page.dart';
 import 'package:teriyaki_bowl_admin_app/views/screens/coupon_screen.dart';
@@ -29,6 +33,53 @@ class _HomeScreenState extends State<HomeScreen> {
   TextEditingController taxController = TextEditingController();
 
   late dynamic tax;
+
+  @override
+  void initState() {
+    super.initState();
+    FirebaseMessaging.onMessage.listen((event) async {
+      if (event.notification?.title != null &&
+          event.notification?.body != null) {
+        _showNotification(event);
+
+        Map<String, dynamic> data = event.data;
+        if (data.containsKey('oid')) {
+          String oid = data['oid'];
+
+          Map<String, dynamic>? orderData =
+              await FirestoreMethods().getOrderById(oid);
+
+          if (orderData != null) {
+            if (!mounted) return;
+            ReceiptPrintController.onPrintReceipt(
+              context,
+              data: orderData,
+            );
+          }
+        }
+      }
+    });
+  }
+
+  Future<void> _showNotification(RemoteMessage event) async {
+    if (event.notification?.title != null && event.notification?.body != null) {
+      await flutterLocalNotificationsPlugin.show(
+        DateTime.timestamp().millisecond,
+        '${event.notification?.title}',
+        '${event.notification?.body}',
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            notificationChannelId,
+            'recent orders Service',
+            channelDescription: 'Service for recent orders',
+            importance: Importance.max,
+            priority: Priority.high,
+            ticker: 'ticker',
+          ),
+        ),
+      );
+    }
+  }
 
   @override
   void dispose() {
@@ -351,7 +402,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 12.heightBox,
-                
                 Material(
                   elevation: 2,
                   borderRadius: BorderRadius.circular(8),
@@ -386,7 +436,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 12.heightBox,
-                
                 Material(
                   elevation: 2,
                   borderRadius: BorderRadius.circular(8),

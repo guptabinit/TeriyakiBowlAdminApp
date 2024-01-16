@@ -65,7 +65,7 @@ class PrintingFactory(
                 val logo = BitmapFactory.decodeResource(context.resources, R.drawable.ic_app_logo)
 
                 printerBuilder.styleAlignment(Alignment.Center)
-                    .actionPrintImage(ImageParameter(logo, 150))
+                    .actionPrintImage(ImageParameter(logo, 120))
 
                 printerBuilder.styleInternationalCharacter(InternationalCharacterType.Usa)
 

@@ -933,7 +933,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                             onTap: () {
                                               ReceiptPrintController
                                                   .onPrintReceipt(
-                                                context: context,
+                                                context,
                                                 data: widget.snap,
                                               );
                                             },

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:teriyaki_bowl_admin_app/main.dart';
 import 'package:teriyaki_bowl_admin_app/star_io_10/star_io_10.dart';
 
@@ -86,16 +87,14 @@ class ReceiptPrintController extends GetxController {
       ..showSnackBar(SnackBar(content: Text(message)));
   }
 
-  static Future<void> onPrintReceipt({
-    BuildContext? context,
-    required dynamic data,
-  }) async {
+  static Future<void> onPrintReceipt(BuildContext context,
+      {required dynamic data}) async {
     int totalLength = 48;
 
     List<String> itemIds = List<String>.from(data['cart']['items']);
     Map<String, dynamic> printingData = {
       'customer_name': data['name'],
-      'pickup_time': data['pickup_time'],
+      'pickup_time': _convertDateFormat(data['pickup_time']),
       'order_number': '#${data['oid']}',
       'total_items': '${itemIds.length} Items',
     };
@@ -141,12 +140,11 @@ class ReceiptPrintController extends GetxController {
     printingData.putIfAbsent('items', () => items);
 
     StarPrinter? printer = ReceiptPrintController.starPrinter;
+    ScaffoldMessengerState state = ScaffoldMessenger.of(context);
     if (printer == null) {
-      if (context != null) {
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(const SnackBar(content: Text('Printer not found')));
-      }
+      state
+        ..hideCurrentSnackBar()
+        ..showSnackBar(const SnackBar(content: Text('Printer not found')));
 
       return;
     }
@@ -154,13 +152,22 @@ class ReceiptPrintController extends GetxController {
       printer: printer,
       printingData: printingData,
       onFailed: (message) {
-        if (context != null) {
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(SnackBar(content: Text(message)));
-        }
+        state
+          ..hideCurrentSnackBar()
+          ..showSnackBar(SnackBar(content: Text(message)));
       },
     );
+  }
+
+  static String _convertDateFormat(String inputString) {
+    DateFormat dateFormat = DateFormat('dd-MM-yyyy hh:mm a');
+
+    DateTime parsedDateTime = dateFormat.parse(inputString);
+
+    String formattedDateTime =
+        DateFormat('MM-dd-yyyy hh:mm a').format(parsedDateTime);
+
+    return formattedDateTime;
   }
 
   static StarPrinter? get starPrinter {

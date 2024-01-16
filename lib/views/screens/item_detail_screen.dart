@@ -143,8 +143,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                       children: [
                         Expanded(
                           child: Text(
-                            '${widget.snap['item_name']}'
-                                .allWordsCapitilize(),
+                            '${widget.snap['item_name']}'.allWordsCapitilize(),
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
@@ -220,10 +219,8 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                     ),
                     8.heightBox,
                     Text(
-                      '${widget.snap['item_description']}'
-                          .allWordsCapitilize(),
-                      style:
-                          const TextStyle(color: Colors.grey, fontSize: 14),
+                      '${widget.snap['item_description']}'.allWordsCapitilize(),
+                      style: const TextStyle(color: Colors.grey, fontSize: 14),
                     )
                   ],
                 ),

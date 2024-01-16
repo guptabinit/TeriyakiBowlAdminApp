@@ -13,13 +13,13 @@ import 'package:flutter_background_service_android/flutter_background_service_an
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:teriyaki_bowl_admin_app/controllers/receipt_print_controller.dart';
-import 'package:teriyaki_bowl_admin_app/resources/firestore_methods.dart';
 import 'package:teriyaki_bowl_admin_app/views/onboarding/splash_screen.dart';
 
 import 'utils/colors.dart';
 
 SharedPreferences? preferences;
+
+final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
 Future<void> _firebaseMessagingBackgroundHandler(
   RemoteMessage message,
@@ -31,8 +31,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   preferences = await SharedPreferences.getInstance();
-
-  final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
   await initializeService(
     flutterLocalNotificationsPlugin,
@@ -83,24 +81,6 @@ void main() async {
   FirebaseMessaging.onMessage.listen(
     _firebaseMessagingBackgroundHandler,
   );
-
-  FirebaseMessaging.onMessage.listen((event) async {
-    if (event.notification?.title != null && event.notification?.body != null) {
-      _showNotification(flutterLocalNotificationsPlugin, event);
-
-      Map<String, dynamic> data = event.data;
-      if (data.containsKey('oid')) {
-        String oid = data['oid'];
-
-        Map<String, dynamic>? orderData =
-            await FirestoreMethods().getOrderById(oid);
-
-        if (orderData != null) {
-          ReceiptPrintController.onPrintReceipt(data: orderData);
-        }
-      }
-    }
-  });
 
   runApp(const MyApp());
 }
@@ -168,29 +148,6 @@ Future<void> initializeService(
       onBackground: onIosBackground,
     ),
   );
-}
-
-Future<void> _showNotification(
-  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
-  RemoteMessage event,
-) async {
-  if (event.notification?.title != null && event.notification?.body != null) {
-    await flutterLocalNotificationsPlugin.show(
-      DateTime.timestamp().millisecond,
-      '${event.notification?.title}',
-      '${event.notification?.body}',
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          notificationChannelId,
-          'recent orders Service',
-          channelDescription: 'Service for recent orders',
-          importance: Importance.max,
-          priority: Priority.high,
-          ticker: 'ticker',
-        ),
-      ),
-    );
-  }
 }
 
 @pragma('vm:entry-point')
