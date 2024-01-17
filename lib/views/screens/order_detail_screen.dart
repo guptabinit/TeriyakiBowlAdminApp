@@ -66,6 +66,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       orderStatus: _selectedOrderOption!,
       paymentCompleted: _selectedPaymentOption!,
       uid: widget.snap['uid'],
+      orderTotal: widget.snap['order_total'],
     );
 
     if (message == 'success') {

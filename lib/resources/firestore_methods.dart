@@ -165,6 +165,7 @@ class FirestoreMethods {
     required int orderStatus,
     required bool paymentCompleted,
     required String uid,
+    required double orderTotal,
   }) async {
     String res = "some error occurred";
     try {
@@ -173,12 +174,26 @@ class FirestoreMethods {
         'payment_completed': paymentCompleted,
       });
 
+      if (orderStatus == 1 && orderTotal != 0) {
+        await _firestore.collection('coins').doc(uid).set({
+          'coins': FieldValue.increment(_getDecimalPlaces(orderTotal)),
+        }, SetOptions(merge: true));
+      }
+
       res = "success";
     } catch (e) {
       res = e.toString();
     }
     return res;
   }
+
+  int _getDecimalPlaces(num number) {
+    int decimals = 0;
+    List<String> subStr = number.toString().split('.');
+    if (subStr.isNotEmpty) decimals = int.tryParse(subStr.first) ?? 0;
+    return decimals;
+  }
+
   // UPDATE Read ORDER
 
   Future<String> updateReadOrder({
