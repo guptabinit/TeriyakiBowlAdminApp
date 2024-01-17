@@ -65,7 +65,7 @@ class PrintingFactory(
                 val logo = BitmapFactory.decodeResource(context.resources, R.drawable.ic_app_logo)
 
                 printerBuilder.styleAlignment(Alignment.Center)
-                    .actionPrintImage(ImageParameter(logo, 120))
+                    .actionPrintImage(ImageParameter(logo, 70))
 
                 printerBuilder.styleInternationalCharacter(InternationalCharacterType.Usa)
 
@@ -76,7 +76,7 @@ class PrintingFactory(
                 )
 
 
-                printerBuilder.add(PrinterBuilder().actionPrintText("\n------------------------------------------------"))
+                printerBuilder.add(PrinterBuilder().actionPrintText("\n-------------------------------------------"))
 
                 printerBuilder.add(
                     PrinterBuilder().styleAlignment(Alignment.Left).actionPrintText("Customer Name")
@@ -134,7 +134,7 @@ class PrintingFactory(
                     )
                 }
 
-                printerBuilder.add(PrinterBuilder().actionPrintText("------------------------------------------------"))
+                printerBuilder.add(PrinterBuilder().actionPrintText("-------------------------------------------"))
 
                 val items = call.argument<List<Map<String, Any>>?>("items") ?: listOf()
                 for (item in items) {

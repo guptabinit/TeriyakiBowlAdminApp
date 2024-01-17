@@ -89,7 +89,7 @@ class ReceiptPrintController extends GetxController {
 
   static Future<void> onPrintReceipt(BuildContext context,
       {required dynamic data}) async {
-    int totalLength = 48;
+    int totalLength = 43;
 
     List<String> itemIds = List<String>.from(data['cart']['items']);
     Map<String, dynamic> printingData = {
@@ -132,8 +132,8 @@ class ReceiptPrintController extends GetxController {
         'item':
             firstPart + List.generate((length), (_) => ' ').join() + secondPart,
         'modifiers': (modifiers != null && modifiers.isNotEmpty)
-            ? '$modifiers\n------------------------------------------------'
-            : '------------------------------------------------\n',
+            ? '$modifiers\n-------------------------------------------'
+            : '-------------------------------------------\n',
       });
     }
 
