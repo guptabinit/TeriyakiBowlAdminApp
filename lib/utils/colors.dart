@@ -6,6 +6,7 @@ const redColor = Color(0xffDD0000);
 const greenColor = Color(0xff00B31D);
 const darkGreyColor = Color(0xff949494);
 const darkTextGreyColor = Color(0xff7D7D7D);
+const textDarkGreyColor = Color(0xff6B6B6B);
 const blueColor = Color(0xff364ED5);
 
 const textDarkColor = Colors.grey;
