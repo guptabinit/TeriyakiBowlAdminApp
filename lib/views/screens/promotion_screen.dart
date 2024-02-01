@@ -147,22 +147,25 @@ class _PromotionScreenState extends State<PromotionScreen> {
                       children: [
                         PromotionalCard(snap: mainSnap),
                         Positioned(
-                          right: -1,
-                          top: 12,
-                          child: IconButton(
-                            color: lightColor,
-                            onPressed: () {
-                              setState(() {
-                                titleController.text = mainSnap['title'];
-                                descriptionController.text =
-                                    mainSnap['description'];
-                              });
-
-                              showUpdateDialogF(mainSnap);
-                            },
-                            icon: const Icon(
-                              Icons.more_vert,
+                          right: 4,
+                          top: 16,
+                          child: CircleAvatar(
+                            backgroundColor: darkColor.withOpacity(0.4),
+                            child: IconButton(
                               color: lightColor,
+                              onPressed: () {
+                                setState(() {
+                                  titleController.text = mainSnap['title'];
+                                  descriptionController.text =
+                                      mainSnap['description'];
+                                });
+
+                                showUpdateDialogF(mainSnap);
+                              },
+                              icon: const Icon(
+                                Icons.more_vert,
+                                color: lightColor,
+                              ),
                             ),
                           ),
                         ),

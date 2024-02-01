@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:teriyaki_bowl_admin_app/common/components/button.dart';
 import 'package:teriyaki_bowl_admin_app/controllers/receipt_print_controller.dart';
 import 'package:teriyaki_bowl_admin_app/resources/firestore_methods.dart';
@@ -24,11 +25,21 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   int? _selectedOrderOption = 0;
   bool? _selectedPaymentOption = false;
 
+  String acceptedAt = "";
+
   @override
   void initState() {
     super.initState();
 
     widget.snap['read'] == false ? updateReadOrder() : null;
+
+    if (widget.snap['order_accepted'] == 1) {
+      try {
+        acceptedAt = 'Order accepted at ${DateFormat('dd MMM yyyy hh:mm a').format(widget.snap['accepted_time'].toDate())}';
+      } catch (e) {
+        print("Some error : $e");
+      }
+    }
 
     setState(() {
       _selectedOrderOption = widget.snap['order_status'];
@@ -174,6 +185,52 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                       ),
                       4.heightBox,
                       const Divider(),
+
+
+                      widget.snap['order_accepted'] == 1
+                          ? Text(
+                              acceptedAt,
+                              style: const TextStyle(
+                                color: primaryColor,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            )
+                          : Container(),
+
+                      widget.snap['order_accepted'] == 1
+                          ? const Divider()
+                          : Container(),
+
+                      widget.snap['order_accepted'] == 0
+                          ? Row(
+                        children: [
+                          Expanded(
+                            child: CustomButton(
+                              btnText: "Decline",
+                              backgroundColor: redColor,
+                              onTap: () {
+                                showDeclineDialog(context);
+                              },
+                            ),
+                          ),
+                          8.widthBox,
+                          Expanded(
+                            child: CustomButton(
+                              btnText: "Accept",
+                              backgroundColor: greenColor,
+                              onTap: () {
+                                // updateOrderAcceptedStatusFun(1);
+                              },
+                            ),
+                          ),
+                        ],
+                      )
+                          : Container(),
+
+                      widget.snap['order_accepted'] == 0
+                          ? const Divider()
+                          : Container(),
+
 
                       widget.snap['is_pickup']
                           ? Container()
@@ -958,4 +1015,73 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             ),
     );
   }
+
+  showDeclineDialog(context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            color: lightColor,
+          ),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                "TK Bowl",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: darkColor,
+                ),
+              ),
+              12.heightBox,
+              const Text(
+                "You want to decline this order?",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: darkColor,
+                ),
+              ),
+              16.heightBox,
+              _isMainLoading
+                  ? const Center(
+                child: CircularProgressIndicator(
+                  color: primaryColor,
+                ),
+              )
+                  : Row(
+                children: [
+                  Expanded(
+                    child: CustomButton(
+                      btnText: "Yes",
+                      onTap: () {
+                        // Get.offAll(() => const LoginPage());
+                      },
+                    ),
+                  ),
+                  12.widthBox,
+                  Expanded(
+                    child: CustomButton(
+                      btnText: "No",
+                      onTap: () {
+                        Get.back();
+                      },
+                    ),
+                  ),
+                ],
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
 }
