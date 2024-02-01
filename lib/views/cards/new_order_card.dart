@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:velocity_x/velocity_x.dart';
+
 import '../../common/components/button.dart';
-import '../../resources/firestore_methods.dart';
 import '../../utils/colors.dart';
 import '../../utils/utils.dart';
 import '../screens/order_detail_screen.dart';
@@ -21,7 +21,7 @@ class _NewOrderCardState extends State<NewOrderCard> {
     return showSnackBar(msg, context);
   }
 
-  bool _isMainLoading = false;
+  final bool _isMainLoading = false;
 
   bool isAccepting = false;
 
@@ -376,7 +376,6 @@ class _NewOrderCardState extends State<NewOrderCard> {
                           child: CustomButton(
                             btnText: "Yes",
                             onTap: () async {
-
                               // Get.back();
                               //
                               // setState(() {
@@ -398,7 +397,6 @@ class _NewOrderCardState extends State<NewOrderCard> {
                               // } else {
                               //   _isMainLoading = false;
                               // }
-
                             },
                           ),
                         ),

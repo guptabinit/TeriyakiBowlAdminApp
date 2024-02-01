@@ -100,7 +100,9 @@ class _OrderBookScreenState extends State<OrderBookScreen> {
         actions: [
           IconButton(
             onPressed: () {
-              Get.to(() => const SearchOrderScreen());
+              Get.to(
+                () => const SearchOrderScreen(),
+              );
             },
             icon: const Icon(
               Icons.search,
