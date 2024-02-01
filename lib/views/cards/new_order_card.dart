@@ -1,5 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:teriyaki_bowl_admin_app/models/doordash/quote_response.dart';
+import 'package:teriyaki_bowl_admin_app/resources/doordash_api.dart';
+import 'package:teriyaki_bowl_admin_app/resources/firestore_methods.dart';
+import 'package:teriyaki_bowl_admin_app/resources/payment_gateway.dart';
 import 'package:velocity_x/velocity_x.dart';
 
 import '../../common/components/button.dart';
@@ -21,110 +26,81 @@ class _NewOrderCardState extends State<NewOrderCard> {
     return showSnackBar(msg, context);
   }
 
-  final bool _isMainLoading = false;
+  bool _isMainLoading = false;
 
   bool isAccepting = false;
 
-  // updateOrderAcceptedStatusFunAsDecline() async {
-  //   setState(() {
-  //     _isMainLoading = true;
-  //   });
-  //
-  //   String message = await FirestoreMethods().updateOrderAcceptedStatus(
-  //     oid: widget.snap['oid'],
-  //     orderAccepted: 2,
-  //   );
-  //
-  //   if (message == 'success') {
-  //     customToast("Order Cancelled Successfully", greenColor, context);
-  //     Get.back();
-  //     _isMainLoading = false;
-  //   } else {
-  //     _isMainLoading = false;
-  //   }
-  // }
-  //
-  // Future<void> updateOrderAcceptedStatusFun(
-  //   int orderAccepted,
-  // ) async {
-  //   try {
-  //     setState(() {
-  //       _isMainLoading = true;
-  //     });
-  //
-  //     if (widget.snap['is_pickup'] == false) {
-  //       final quote = widget.snap['quote'];
-  //       final selectedItems = (widget.snap['selected_items'] as List)
-  //           .map((e) => Item.fromJson(e))
-  //           .toList();
-  //
-  //       print(quote);
-  //       print(selectedItems);
-  //
-  //       print('-------------------');
-  //       print('${widget.snap['is_pickup']}');
-  //       print('-------------------');
-  //
-  //       try {
-  //         final res = await DoordashApiClient().createDelivery(
-  //           pickupAddress: '${quote['pickup_address']}',
-  //           pickupBusinessName: '${quote['pickup_business_name']}',
-  //           pickupPhoneNumber: '${quote['pickup_phone_number']}',
-  //           dropoffAddress: '${quote['dropoff_address']}',
-  //           dropoffBusinessName: '${quote['dropoff_business_name']}',
-  //           dropoffPhoneNumber: '${quote['dropoff_phone_number']}',
-  //           dropoffContactGivenName: '${quote['dropoff_contact_given_name']}',
-  //           orderValue: int.parse('${quote['order_value']}'),
-  //           latitude: double.parse('${quote['dropoff_location']['lat']}'),
-  //           longitude: double.parse('${quote['dropoff_location']['lng']}'),
-  //           items: selectedItems,
-  //         );
-  //
-  //         print('-------------------');
-  //         print(res.deliveryStatus);
-  //         print(res.trackingUrl);
-  //         print('-------------------');
-  //
-  //         await FirestoreMethods().updateDoorDashOrderCreated(
-  //           oid: widget.snap['oid'],
-  //           deliveryId: res.externalDeliveryId,
-  //           orderStatus: res.deliveryStatus,
-  //           trackingUrl: res.trackingUrl,
-  //         );
-  //
-  //         Get.snackbar(
-  //           "Success",
-  //           "Doordash order created",
-  //           backgroundColor: Colors.green,
-  //           snackPosition: SnackPosition.BOTTOM,
-  //           margin: const EdgeInsets.all(16),
-  //         );
-  //       } catch (e) {
-  //         Get.snackbar(
-  //           "Error",
-  //           "Error while creating doordash order",
-  //           backgroundColor: Colors.red,
-  //           snackPosition: SnackPosition.BOTTOM,
-  //           margin: const EdgeInsets.all(16),
-  //         );
-  //         return;
-  //       }
-  //     }
-  //
-  //     String message = await FirestoreMethods().updateOrderAcceptedStatus(
-  //       oid: widget.snap['oid'],
-  //       orderAccepted: orderAccepted,
-  //     );
-  //
-  //     if (message == 'success') {
-  //       _isMainLoading = false;
-  //     } else {
-  //       _isMainLoading = false;
-  //     }
-  //   } catch (_) {
-  //     _isMainLoading = false;
-  //   }
-  // }
+  Future<void> updateOrderAcceptedStatusFun(
+    int orderAccepted,
+  ) async {
+    try {
+      setState(() {
+        _isMainLoading = true;
+      });
+
+      if (widget.snap['is_pickup'] == false) {
+        final quote = widget.snap['quote'];
+        final selectedItems = (widget.snap['selected_items'] as List)
+            .map((e) => Item.fromJson(e))
+            .toList();
+
+        try {
+          final res = await DoordashApiClient().createDelivery(
+            pickupAddress: '${quote['pickup_address']}',
+            pickupBusinessName: '${quote['pickup_business_name']}',
+            pickupPhoneNumber: '${quote['pickup_phone_number']}',
+            dropoffAddress: '${quote['dropoff_address']}',
+            dropoffBusinessName: '${quote['dropoff_business_name']}',
+            dropoffPhoneNumber: '${quote['dropoff_phone_number']}',
+            dropoffContactGivenName: '${quote['dropoff_contact_given_name']}',
+            orderValue: int.parse('${quote['order_value']}'),
+            latitude: double.parse('${quote['dropoff_location']['lat']}'),
+            longitude: double.parse('${quote['dropoff_location']['lng']}'),
+            items: selectedItems,
+          );
+
+          await FirestoreMethods().updateDoorDashOrderCreated(
+            oid: widget.snap['oid'],
+            deliveryId: res.externalDeliveryId,
+            orderStatus: res.deliveryStatus,
+            trackingUrl: res.trackingUrl,
+          );
+
+          Get.snackbar(
+            "Success",
+            "Doordash order created",
+            backgroundColor: Colors.green,
+            snackPosition: SnackPosition.BOTTOM,
+            margin: const EdgeInsets.all(16),
+          );
+        } catch (e) {
+          Get.snackbar(
+            "Error",
+            "Error while creating doordash order",
+            backgroundColor: Colors.red,
+            snackPosition: SnackPosition.BOTTOM,
+            margin: const EdgeInsets.all(16),
+          );
+          return;
+        }
+      }
+
+      String message = await FirestoreMethods().updateOrderAcceptedStatus(
+        oid: widget.snap['oid'],
+        orderAccepted: orderAccepted,
+      );
+
+      // if (message == 'success') {
+      //   // TODO: 1. Print Receipt
+      //   // ReceiptPrintController.onPrintReceipt(widget.snap);
+      //   _isMainLoading = false;
+      // } else {
+      //   _isMainLoading = false;
+      // }
+    } catch (_) {
+      _isMainLoading = false;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -297,6 +273,7 @@ class _NewOrderCardState extends State<NewOrderCard> {
                                 btnText: "Accept",
                                 backgroundColor: greenColor,
                                 onTap: () async {
+                                  await updateOrderAcceptedStatusFun(1);
                                   // setState(() {
                                   //   isAccepting = true;
                                   // });
@@ -397,6 +374,112 @@ class _NewOrderCardState extends State<NewOrderCard> {
                               // } else {
                               //   _isMainLoading = false;
                               // }
+
+                              Get.back();
+
+                              setState(() {
+                                _isMainLoading = true;
+                              });
+
+                              try {
+                                if (widget.snap?['payment_completed'] == true &&
+                                    widget.snap?['is_cod'] == false) {
+                                  final transId =
+                                      widget.snap?['transaction']?['transId'];
+                                  final cardNumber = widget.snap?['transaction']
+                                      ?['accountNumber'];
+                                  final amount = widget.snap?['order_total'];
+
+                                  final refundResult =
+                                      await PaymentGateway().refund(
+                                    refTransId: transId,
+                                    cardNumber: cardNumber.substring(
+                                      cardNumber.length - 4,
+                                    ),
+                                    amount: amount,
+                                  );
+
+                                  if (refundResult.messages?.resultCode
+                                          ?.toLowerCase() ==
+                                      'ok') {
+                                    await FirebaseFirestore.instance
+                                        .collection('allOrders')
+                                        .doc(widget.snap['oid'])
+                                        .update(
+                                      {
+                                        'order_accepted': 2,
+                                        'payment_completed': false,
+                                      },
+                                    );
+
+                                    final messages = refundResult
+                                        .transactionResponse?.messages
+                                        ?.map((e) => e.description)
+                                        .join(' ');
+
+                                    Get.snackbar(
+                                      "Refund",
+                                      messages ?? 'Refund initialized',
+                                      snackPosition: SnackPosition.BOTTOM,
+                                      margin: EdgeInsets.all(12.0),
+                                      backgroundColor: Colors.yellow,
+                                    );
+                                  } else {
+                                    print(refundResult);
+                                    final message = refundResult
+                                        .transactionResponse?.errors
+                                        ?.map((e) => e.errorText)
+                                        .join(' ');
+                                    Get.snackbar(
+                                      "Refund",
+                                      message ?? 'Refund failed',
+                                      snackPosition: SnackPosition.BOTTOM,
+                                      margin: EdgeInsets.all(12.0),
+                                      backgroundColor: Colors.red,
+                                      colorText: Colors.white,
+                                    );
+                                  }
+                                }
+                              } on PaymentGatewayFailure catch (e) {
+                                Get.snackbar(
+                                  "Refund",
+                                  e.message,
+                                  snackPosition: SnackPosition.BOTTOM,
+                                  margin: const EdgeInsets.all(12.0),
+                                  backgroundColor: Colors.red,
+                                );
+                              } catch (_) {
+                                Get.snackbar(
+                                  "Refund",
+                                  'Refund failed',
+                                  snackPosition: SnackPosition.BOTTOM,
+                                  margin: const EdgeInsets.all(12.0),
+                                  backgroundColor: Colors.red,
+                                );
+                              }
+
+                              String message = await FirestoreMethods()
+                                  .updateOrderAcceptedStatus(
+                                oid: widget.snap['oid'],
+                                orderAccepted: 2,
+                              );
+
+                              if (message == 'success') {
+                                // Get.back();
+
+                                Get.snackbar(
+                                  "Order cancelled",
+                                  "Order Cancelled Successfully",
+                                  snackPosition: SnackPosition.BOTTOM,
+                                  margin: const EdgeInsets.all(12.0),
+                                  backgroundColor: Colors.red,
+                                );
+
+                                _isMainLoading = false;
+                              } else {
+                                _isMainLoading = false;
+                              }
+                              Get.back();
                             },
                           ),
                         ),

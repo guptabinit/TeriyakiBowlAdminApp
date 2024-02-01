@@ -10,6 +10,45 @@ class FirestoreMethods {
 
   // PROMOTION CODE
 
+  Future<String> updateOrderAcceptedStatus({
+    required String oid,
+    required int orderAccepted,
+  }) async {
+    String res = "some error occurred";
+    try {
+      await _firestore.collection('allOrders').doc(oid).update({
+        'order_accepted': orderAccepted,
+        'accepted_time': FieldValue.serverTimestamp(),
+      });
+
+      res = "success";
+    } catch (e) {
+      res = e.toString();
+    }
+    return res;
+  }
+
+  Future<String> updateDoorDashOrderCreated({
+    required String oid,
+    String? deliveryId,
+    String? orderStatus,
+    String? trackingUrl,
+  }) async {
+    String res = "some error occurred";
+    try {
+      await _firestore.collection('allOrders').doc(oid).update({
+        'tracking_url': trackingUrl,
+        'doordash_order_status': orderStatus,
+        'delivery_id': deliveryId,
+      });
+
+      res = "success";
+    } catch (e) {
+      res = e.toString();
+    }
+    return res;
+  }
+
   Future<void> addPromotion({
     required String promotionID,
     required String title,
@@ -18,8 +57,10 @@ class FirestoreMethods {
     required context,
   }) async {
     try {
-      String photoUrl =
-          await StorageMethods().uploadImageToStorage(file!, promotionID);
+      String photoUrl = await StorageMethods().uploadImageToStorage(
+        file!,
+        promotionID,
+      );
 
       await _firestore.collection('commons').doc('promotions').set({
         promotionID: {

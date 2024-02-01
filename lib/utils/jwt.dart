@@ -5,12 +5,12 @@ String generateJwt() {
 
   final claims = JsonWebTokenClaims.fromJson({
     "aud": "doordash",
-    "iss": 'fc160dbc-9283-4e26-b568-9ee0efd384fc',
-    // "fc160dbc-9283-4e26-b568-9ee0efd384fc" = Live,
-    // "fc160dbc-9283-4e26-b568-9ee0efd384fc" = Sandbox,
-    "kid": '0b863bc5-41d3-420d-b9c6-58560e6bd961',
-    // "0b863bc5-41d3-420d-b9c6-58560e6bd961" - Live,
-    // "84437014-fe30-4a75-b931-62a8c60a07d9" - Sandbox,
+    "iss": '2e3be3e9-e42e-446d-909c-ab8bdd60c1d3',
+    // "2e3be3e9-e42e-446d-909c-ab8bdd60c1d3" = Live,
+    // "2e3be3e9-e42e-446d-909c-ab8bdd60c1d3" = Sandbox,
+    "kid": '5e5e5d0d-66d2-4302-b2cb-132cc65d0854',
+    // "5e5e5d0d-66d2-4302-b2cb-132cc65d0854" - Live,
+    // "af79a37e-39cf-426b-a153-b5826cc2a305" - Sandbox,
     "iat": currentTimer,
     "exp": currentTimer + 1800,
   });
@@ -26,9 +26,9 @@ String generateJwt() {
     JsonWebKey.fromJson(
       {
         "kty": "oct",
-        "k": 'wFhHqQ8AvqlMex3FU6x2-CZ13KiB6fdtnCEUTkNoWr8'
-        // "wFhHqQ8AvqlMex3FU6x2-CZ13KiB6fdtnCEUTkNoWr8" - Live,
-        // "UMITk03e1-EldszRof6ZqI2QeduL7mgSONjcIrDGXUs" - Sandbox,
+        "k": "iNUSvPAopv2nC5YCc08dazjHr-c8Benpd18gbYoTPxw",
+        // "W6z_poOSWyFNtAgdoPxIeXcJ2hTIxXSeuqTN0TywIbw",
+        // Live: "iNUSvPAopv2nC5YCc08dazjHr-c8Benpd18gbYoTPxw"
       },
     ),
     algorithm: "HS256",

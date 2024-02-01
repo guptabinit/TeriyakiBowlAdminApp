@@ -8,9 +8,6 @@ import 'package:teriyaki_bowl_admin_app/models/refund.dart';
 class PaymentGateway {
   PaymentGateway({
     http.Client? httpClient,
-    required this.name,
-    required this.transactionKey,
-    required this.refId,
   }) : _httpClient = httpClient ?? http.Client();
 
   Future<Refund> refund({
@@ -35,7 +32,7 @@ class PaymentGateway {
             "refId": refId,
             "transactionRequest": {
               "transactionType": "refundTransaction",
-              "amount": "${amount}",
+              "amount": "$amount",
               "payment": {
                 "creditCard": {
                   "cardNumber": cardNumber,
@@ -59,12 +56,15 @@ class PaymentGateway {
     return Refund.fromJson(jsonDecode(refundResponse.body));
   }
 
+  static const String name =
+      '3ujXYX5w7s'; // '5KP3u95bQpv', //'3ujXYX5w7s', (live)
+  static const String transactionKey =
+      '99RA628ynSA3Uw9n'; //'346HZ32z3fP4hTG2', //'99RA628ynSA3Uw9n', (live)
+  static const String refId = '8582957'; // '123456' //'8582957', (live)
+
   static const String _baseUrl =
       'api.authorize.net'; // sandbox - 'apitest.authorize.net', Live - api.authorize.net;
 
-  final String name;
-  final String transactionKey;
-  final String refId;
   final http.Client _httpClient;
 }
 

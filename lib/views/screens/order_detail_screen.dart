@@ -1,13 +1,17 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:teriyaki_bowl_admin_app/common/components/button.dart';
 import 'package:teriyaki_bowl_admin_app/controllers/receipt_print_controller.dart';
+import 'package:teriyaki_bowl_admin_app/models/doordash/quote_response.dart';
+import 'package:teriyaki_bowl_admin_app/resources/doordash_api.dart';
 import 'package:teriyaki_bowl_admin_app/resources/firestore_methods.dart';
+import 'package:teriyaki_bowl_admin_app/resources/payment_gateway.dart';
 import 'package:teriyaki_bowl_admin_app/utils/utils.dart';
-import 'package:velocity_x/velocity_x.dart';
 import 'package:url_launcher/url_launcher_string.dart';
+import 'package:velocity_x/velocity_x.dart';
 
 import '../../common/widgets/fixed_cart.dart';
 import '../../utils/colors.dart';
@@ -35,7 +39,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
 
     if (widget.snap['order_accepted'] == 1) {
       try {
-        acceptedAt = 'Order accepted at ${DateFormat('dd MMM yyyy hh:mm a').format(widget.snap['accepted_time'].toDate())}';
+        acceptedAt =
+            'Order accepted at ${DateFormat('dd MMM yyyy hh:mm a').format(widget.snap['accepted_time'].toDate())}';
       } catch (e) {
         print("Some error : $e");
       }
@@ -120,6 +125,82 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     }
   }
 
+  Future<void> updateOrderAcceptedStatusFun(
+    int orderAccepted,
+  ) async {
+    try {
+      setState(() {
+        _isMainLoading = true;
+      });
+
+      if (widget.snap['is_pickup'] == false) {
+        final quote = widget.snap['quote'];
+        final selectedItems = (widget.snap['selected_items'] as List)
+            .map((e) => Item.fromJson(e))
+            .toList();
+
+        try {
+          final res = await DoordashApiClient().createDelivery(
+            pickupAddress: '${quote['pickup_address']}',
+            pickupBusinessName: '${quote['pickup_business_name']}',
+            pickupPhoneNumber: '${quote['pickup_phone_number']}',
+            dropoffAddress: '${quote['dropoff_address']}',
+            dropoffBusinessName: '${quote['dropoff_business_name']}',
+            dropoffPhoneNumber: '${quote['dropoff_phone_number']}',
+            dropoffContactGivenName: '${quote['dropoff_contact_given_name']}',
+            orderValue: int.parse('${quote['order_value']}'),
+            latitude: double.parse('${quote['dropoff_location']['lat']}'),
+            longitude: double.parse('${quote['dropoff_location']['lng']}'),
+            items: selectedItems,
+          );
+
+          await FirestoreMethods().updateDoorDashOrderCreated(
+            oid: widget.snap['oid'],
+            deliveryId: res.externalDeliveryId,
+            orderStatus: res.deliveryStatus,
+            trackingUrl: res.trackingUrl,
+          );
+
+          Get.snackbar(
+            "Success",
+            "Doordash order created",
+            backgroundColor: Colors.green,
+            snackPosition: SnackPosition.BOTTOM,
+            margin: const EdgeInsets.all(16),
+          );
+        } catch (e) {
+          Get.snackbar(
+            "Error",
+            "Error while creating doordash order",
+            backgroundColor: Colors.red,
+            snackPosition: SnackPosition.BOTTOM,
+            margin: const EdgeInsets.all(16),
+          );
+          return;
+        }
+      }
+
+      String message = await FirestoreMethods().updateOrderAcceptedStatus(
+        oid: widget.snap['oid'],
+        orderAccepted: orderAccepted,
+      );
+
+      if (message == 'success') {
+        // TODO: 1. Print Receipt
+        // ReceiptPrintController.onPrintReceipt(widget.snap);
+        // _isMainLoading = false;
+      }
+      // else {
+      //   _isMainLoading = false;
+      // }
+    } catch (_) {
+      // _isMainLoading = false;
+    } finally {
+      _isMainLoading = false;
+      setState(() {});
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -186,7 +267,6 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                       4.heightBox,
                       const Divider(),
 
-
                       widget.snap['order_accepted'] == 1
                           ? Text(
                               acceptedAt,
@@ -203,34 +283,34 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
 
                       widget.snap['order_accepted'] == 0
                           ? Row(
-                        children: [
-                          Expanded(
-                            child: CustomButton(
-                              btnText: "Decline",
-                              backgroundColor: redColor,
-                              onTap: () {
-                                showDeclineDialog(context);
-                              },
-                            ),
-                          ),
-                          8.widthBox,
-                          Expanded(
-                            child: CustomButton(
-                              btnText: "Accept",
-                              backgroundColor: greenColor,
-                              onTap: () {
-                                // updateOrderAcceptedStatusFun(1);
-                              },
-                            ),
-                          ),
-                        ],
-                      )
+                              children: [
+                                Expanded(
+                                  child: CustomButton(
+                                    btnText: "Decline",
+                                    backgroundColor: redColor,
+                                    onTap: () {
+                                      showDeclineDialog(context);
+                                    },
+                                  ),
+                                ),
+                                8.widthBox,
+                                Expanded(
+                                  child: CustomButton(
+                                    btnText: "Accept",
+                                    backgroundColor: greenColor,
+                                    onTap: () async {
+                                      await updateOrderAcceptedStatusFun(1);
+                                      Get.close(1);
+                                    },
+                                  ),
+                                ),
+                              ],
+                            )
                           : Container(),
 
                       widget.snap['order_accepted'] == 0
                           ? const Divider()
                           : Container(),
-
 
                       widget.snap['is_pickup']
                           ? Container()
@@ -1052,36 +1132,140 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
               16.heightBox,
               _isMainLoading
                   ? const Center(
-                child: CircularProgressIndicator(
-                  color: primaryColor,
-                ),
-              )
+                      child: CircularProgressIndicator(
+                        color: primaryColor,
+                      ),
+                    )
                   : Row(
-                children: [
-                  Expanded(
-                    child: CustomButton(
-                      btnText: "Yes",
-                      onTap: () {
-                        // Get.offAll(() => const LoginPage());
-                      },
-                    ),
-                  ),
-                  12.widthBox,
-                  Expanded(
-                    child: CustomButton(
-                      btnText: "No",
-                      onTap: () {
-                        Get.back();
-                      },
-                    ),
-                  ),
-                ],
-              )
+                      children: [
+                        Expanded(
+                          child: CustomButton(
+                            btnText: "Yes",
+                            onTap: () async {
+                              // Get.offAll(() => const LoginPage());
+                              Get.back();
+
+                              setState(() {
+                                _isMainLoading = true;
+                              });
+
+                              try {
+                                if (widget.snap?['payment_completed'] == true &&
+                                    widget.snap?['is_cod'] == false) {
+                                  final transId =
+                                      widget.snap?['transaction']?['transId'];
+                                  final cardNumber = widget.snap?['transaction']
+                                      ?['accountNumber'];
+                                  final amount = widget.snap?['order_total'];
+
+                                  final refundResult =
+                                      await PaymentGateway().refund(
+                                    refTransId: transId,
+                                    cardNumber: cardNumber.substring(
+                                      cardNumber.length - 4,
+                                    ),
+                                    amount: amount,
+                                  );
+
+                                  if (refundResult.messages?.resultCode
+                                          ?.toLowerCase() ==
+                                      'ok') {
+                                    await FirebaseFirestore.instance
+                                        .collection('allOrders')
+                                        .doc(widget.snap['oid'])
+                                        .update(
+                                      {
+                                        'order_accepted': 2,
+                                        'payment_completed': false,
+                                      },
+                                    );
+
+                                    final messages = refundResult
+                                        .transactionResponse?.messages
+                                        ?.map((e) => e.description)
+                                        .join(' ');
+
+                                    Get.snackbar(
+                                      "Refund",
+                                      messages ?? 'Refund initialized',
+                                      snackPosition: SnackPosition.BOTTOM,
+                                      margin: EdgeInsets.all(12.0),
+                                      backgroundColor: Colors.yellow,
+                                    );
+                                  } else {
+                                    print(refundResult);
+                                    final message = refundResult
+                                        .transactionResponse?.errors
+                                        ?.map((e) => e.errorText)
+                                        .join(' ');
+                                    Get.snackbar(
+                                      "Refund",
+                                      message ?? 'Refund failed',
+                                      snackPosition: SnackPosition.BOTTOM,
+                                      margin: EdgeInsets.all(12.0),
+                                      backgroundColor: Colors.red,
+                                      colorText: Colors.white,
+                                    );
+                                  }
+                                }
+                              } on PaymentGatewayFailure catch (e) {
+                                Get.snackbar(
+                                  "Refund",
+                                  e.message,
+                                  snackPosition: SnackPosition.BOTTOM,
+                                  margin: const EdgeInsets.all(12.0),
+                                  backgroundColor: Colors.red,
+                                );
+                              } catch (_) {
+                                Get.snackbar(
+                                  "Refund",
+                                  'Refund failed',
+                                  snackPosition: SnackPosition.BOTTOM,
+                                  margin: const EdgeInsets.all(12.0),
+                                  backgroundColor: Colors.red,
+                                );
+                              }
+
+                              String message = await FirestoreMethods()
+                                  .updateOrderAcceptedStatus(
+                                oid: widget.snap['oid'],
+                                orderAccepted: 2,
+                              );
+
+                              if (message == 'success') {
+                                // Get.back();
+
+                                Get.snackbar(
+                                  "Order cancelled",
+                                  "Order Cancelled Successfully",
+                                  snackPosition: SnackPosition.BOTTOM,
+                                  margin: const EdgeInsets.all(12.0),
+                                  backgroundColor: Colors.red,
+                                );
+
+                                _isMainLoading = false;
+                              } else {
+                                _isMainLoading = false;
+                              }
+                              Get.close(1);
+                            },
+                          ),
+                        ),
+                        12.widthBox,
+                        Expanded(
+                          child: CustomButton(
+                            btnText: "No",
+                            onTap: () {
+                              Get.back();
+                            },
+                          ),
+                        ),
+                      ],
+                    )
             ],
           ),
         ),
       ),
     );
   }
-
 }
