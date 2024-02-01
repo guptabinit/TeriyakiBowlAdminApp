@@ -13,6 +13,7 @@ import 'package:teriyaki_bowl_admin_app/views/screens/categories_page.dart';
 import 'package:teriyaki_bowl_admin_app/views/screens/coupon_screen.dart';
 import 'package:teriyaki_bowl_admin_app/views/screens/promotion_screen.dart';
 import 'package:teriyaki_bowl_admin_app/views/screens/receipt_print_screen.dart';
+import 'package:teriyaki_bowl_admin_app/views/screens/sales_report_screen.dart';
 import 'package:velocity_x/velocity_x.dart';
 
 import '../../common/widgets/text_field.dart';
@@ -457,6 +458,40 @@ class _HomeScreenState extends State<HomeScreen> {
                           const Expanded(
                             child: Text(
                               "Update/Add Product",
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: darkColor,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          8.widthBox,
+                          const Icon(Icons.arrow_forward_ios)
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                12.heightBox,
+                Material(
+                  elevation: 2,
+                  borderRadius: BorderRadius.circular(8),
+                  color: Colors.lime[200],
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(8),
+                    onTap: () {
+                      Get.to(() => const SalesReportScreen());
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 24, horizontal: 16),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.dashboard_rounded),
+                          8.widthBox,
+                          const Expanded(
+                            child: Text(
+                              'Sales Report',
                               style: TextStyle(
                                 fontSize: 16,
                                 color: darkColor,
