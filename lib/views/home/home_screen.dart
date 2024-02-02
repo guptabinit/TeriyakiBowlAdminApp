@@ -440,7 +440,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Material(
                   elevation: 2,
                   borderRadius: BorderRadius.circular(8),
-                  color: Colors.blueAccent[100],
+                  color: Colors.pink[100],
                   child: InkWell(
                     borderRadius: BorderRadius.circular(8),
                     onTap: () {
