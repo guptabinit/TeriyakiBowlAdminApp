@@ -87,8 +87,7 @@ class ReceiptPrintController extends GetxController {
       ..showSnackBar(SnackBar(content: Text(message)));
   }
 
-  static Future<void> onPrintReceipt(BuildContext context,
-      {required dynamic data}) async {
+  static Future<void> onPrintReceipt(dynamic data) async {
     int totalLength = 43;
 
     List<String> itemIds = List<String>.from(data['cart']['items']);
@@ -140,21 +139,25 @@ class ReceiptPrintController extends GetxController {
     printingData.putIfAbsent('items', () => items);
 
     StarPrinter? printer = ReceiptPrintController.starPrinter;
-    ScaffoldMessengerState state = ScaffoldMessenger.of(context);
     if (printer == null) {
-      state
-        ..hideCurrentSnackBar()
-        ..showSnackBar(const SnackBar(content: Text('Printer not found')));
-
+      Get.snackbar(
+        'Error',
+        'Printer not found',
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+      );
       return;
     }
     return StarIO10.print(
       printer: printer,
       printingData: printingData,
       onFailed: (message) {
-        state
-          ..hideCurrentSnackBar()
-          ..showSnackBar(SnackBar(content: Text(message)));
+        Get.snackbar(
+          'Error',
+          message,
+          snackPosition: SnackPosition.BOTTOM,
+          margin: const EdgeInsets.all(16),
+        );
       },
     );
   }

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:teriyaki_bowl_admin_app/controllers/receipt_print_controller.dart';
 import 'package:teriyaki_bowl_admin_app/models/doordash/quote_response.dart';
 import 'package:teriyaki_bowl_admin_app/resources/doordash_api.dart';
 import 'package:teriyaki_bowl_admin_app/resources/firestore_methods.dart';
@@ -13,7 +14,7 @@ import '../../utils/utils.dart';
 import '../screens/order_detail_screen.dart';
 
 class NewOrderCard extends StatefulWidget {
-  final snap;
+  final dynamic snap;
 
   const NewOrderCard({super.key, required this.snap});
 
@@ -90,13 +91,12 @@ class _NewOrderCardState extends State<NewOrderCard> {
         orderAccepted: orderAccepted,
       );
 
-      // if (message == 'success') {
-      //   // TODO: 1. Print Receipt
-      //   // ReceiptPrintController.onPrintReceipt(widget.snap);
-      //   _isMainLoading = false;
-      // } else {
-      //   _isMainLoading = false;
-      // }
+      if (message == 'success') {
+        ReceiptPrintController.onPrintReceipt(widget.snap);
+        _isMainLoading = false;
+      } else {
+        _isMainLoading = false;
+      }
     } catch (_) {
       _isMainLoading = false;
     }
@@ -421,11 +421,10 @@ class _NewOrderCardState extends State<NewOrderCard> {
                                       "Refund",
                                       messages ?? 'Refund initialized',
                                       snackPosition: SnackPosition.BOTTOM,
-                                      margin: EdgeInsets.all(12.0),
+                                      margin: const EdgeInsets.all(12.0),
                                       backgroundColor: Colors.yellow,
                                     );
                                   } else {
-                                    print(refundResult);
                                     final message = refundResult
                                         .transactionResponse?.errors
                                         ?.map((e) => e.errorText)
@@ -434,7 +433,7 @@ class _NewOrderCardState extends State<NewOrderCard> {
                                       "Refund",
                                       message ?? 'Refund failed',
                                       snackPosition: SnackPosition.BOTTOM,
-                                      margin: EdgeInsets.all(12.0),
+                                      margin: const EdgeInsets.all(12.0),
                                       backgroundColor: Colors.red,
                                       colorText: Colors.white,
                                     );

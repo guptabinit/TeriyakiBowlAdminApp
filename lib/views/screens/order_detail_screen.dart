@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:teriyaki_bowl_admin_app/common/components/button.dart';
 import 'package:teriyaki_bowl_admin_app/controllers/receipt_print_controller.dart';
+import 'package:teriyaki_bowl_admin_app/main.dart';
 import 'package:teriyaki_bowl_admin_app/models/doordash/quote_response.dart';
 import 'package:teriyaki_bowl_admin_app/resources/doordash_api.dart';
 import 'package:teriyaki_bowl_admin_app/resources/firestore_methods.dart';
@@ -42,7 +43,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         acceptedAt =
             'Order accepted at ${DateFormat('dd MMM yyyy hh:mm a').format(widget.snap['accepted_time'].toDate())}';
       } catch (e) {
-        print("Some error : $e");
+        e.log();
       }
     }
 
@@ -186,13 +187,15 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       );
 
       if (message == 'success') {
-        // TODO: 1. Print Receipt
-        // ReceiptPrintController.onPrintReceipt(widget.snap);
-        // _isMainLoading = false;
+        ReceiptPrintController.onPrintReceipt(widget.snap);
+        setState(() {
+          _isMainLoading = false;
+        });
+      } else {
+        setState(() {
+          _isMainLoading = false;
+        });
       }
-      // else {
-      //   _isMainLoading = false;
-      // }
     } catch (_) {
       // _isMainLoading = false;
     } finally {
@@ -1070,10 +1073,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                             btnText: 'Recepit Print',
                                             onTap: () {
                                               ReceiptPrintController
-                                                  .onPrintReceipt(
-                                                context,
-                                                data: widget.snap,
-                                              );
+                                                  .onPrintReceipt(widget.snap);
                                             },
                                           ),
                                         ),
@@ -1189,11 +1189,10 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                       "Refund",
                                       messages ?? 'Refund initialized',
                                       snackPosition: SnackPosition.BOTTOM,
-                                      margin: EdgeInsets.all(12.0),
+                                      margin: const EdgeInsets.all(12.0),
                                       backgroundColor: Colors.yellow,
                                     );
                                   } else {
-                                    print(refundResult);
                                     final message = refundResult
                                         .transactionResponse?.errors
                                         ?.map((e) => e.errorText)
@@ -1202,7 +1201,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                       "Refund",
                                       message ?? 'Refund failed',
                                       snackPosition: SnackPosition.BOTTOM,
-                                      margin: EdgeInsets.all(12.0),
+                                      margin: const EdgeInsets.all(12.0),
                                       backgroundColor: Colors.red,
                                       colorText: Colors.white,
                                     );

@@ -52,10 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
           if (orderData != null) {
             if (!mounted) return;
-            ReceiptPrintController.onPrintReceipt(
-              context,
-              data: orderData,
-            );
+            ReceiptPrintController.onPrintReceipt(orderData);
           }
         }
       }

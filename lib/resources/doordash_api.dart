@@ -15,7 +15,7 @@ class DoordashApiClient {
       '/drive/v2/deliveries/$deliveryId',
     );
 
-    final token = await generateJwt();
+    final token = generateJwt();
 
     final getDeliveryInfoResponse = await _httpClient.get(
       getDeliveryInfoRequest,
@@ -96,7 +96,7 @@ class DoordashApiClient {
       '/drive/v2/deliveries',
     );
 
-    final token = await generateJwt();
+    final token = generateJwt();
 
     final createQuoteResponse = await _httpClient.post(
       createQuoteRequest,
@@ -191,10 +191,10 @@ class DoordashApiClient {
   Future<QuoteResponse> cancelDelivery(String deliveryId) async {
     final createQuoteRequest = Uri.https(
       _baseUrlDoorDash,
-      '/drive/v2/deliveries/${deliveryId}/cancel',
+      '/drive/v2/deliveries/$deliveryId/cancel',
     );
 
-    final token = await generateJwt();
+    final token = generateJwt();
 
     final createQuoteResponse = await _httpClient.put(
       createQuoteRequest,
