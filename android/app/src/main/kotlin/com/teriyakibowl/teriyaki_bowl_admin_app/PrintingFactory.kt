@@ -76,7 +76,7 @@ class PrintingFactory(
                 )
 
 
-                printerBuilder.add(PrinterBuilder().actionPrintText("\n-------------------------------------------"))
+                printerBuilder.add(PrinterBuilder().actionPrintText("\n------------------------------------------"))
 
                 printerBuilder.add(
                     PrinterBuilder().styleAlignment(Alignment.Left).actionPrintText("Customer Name")
@@ -134,7 +134,7 @@ class PrintingFactory(
                     )
                 }
 
-                printerBuilder.add(PrinterBuilder().actionPrintText("-------------------------------------------"))
+                printerBuilder.add(PrinterBuilder().actionPrintText("------------------------------------------"))
 
                 val items = call.argument<List<Map<String, Any>>?>("items") ?: listOf()
                 for (item in items) {
