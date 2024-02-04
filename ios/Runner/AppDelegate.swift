@@ -7,7 +7,7 @@ import StarIO10
     
     private var manager: StarDeviceDiscoveryManager? = nil
     private var result: FlutterResult? = nil
-    // private var printingDelegate = PrintingDelegate()
+    private var printingDelegate = PrintingDelegate()
     
     override func application(
         _ application: UIApplication,
@@ -16,8 +16,8 @@ import StarIO10
         GeneratedPluginRegistrant.register(with: self)
         
         let controller : FlutterViewController = window?.rootViewController as! FlutterViewController
-                 let channel = FlutterMethodChannel(name: "com.teriyaki-bowl/star-io10",
-                                                    binaryMessenger: controller.binaryMessenger)
+        let channel = FlutterMethodChannel(name: "com.teriyaki-bowl/star-io10",
+                                           binaryMessenger: controller.binaryMessenger)
         
         channel.setMethodCallHandler({
             (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
@@ -51,14 +51,14 @@ import StarIO10
                 
             } else if call.method == "print" {
                 
-//                if let arguments = call.arguments as? Dictionary<String, Any>{
-//                    let identifier = arguments["identifier"] as! String
-//                    let interfaceType = arguments["interfaceType"] as? String ?? "unknown"
-//                    
-//                    let type = self.getInterfaceType(type: interfaceType)
-//                    
-//                    self.printingDelegate.startPrint(type: type, identifier: identifier, arguments: arguments)
-//                }
+                if let arguments = call.arguments as? Dictionary<String, Any>{
+                    let identifier = arguments["identifier"] as! String
+                    let interfaceType = arguments["interfaceType"] as? String ?? "unknown"
+                    
+                    let type = self.getInterfaceType(type: interfaceType)
+                    
+                    self.printingDelegate.startPrint(type: type, identifier: identifier, arguments: arguments)
+                }
                 
             } else {
                 result(FlutterMethodNotImplemented)
