@@ -120,7 +120,7 @@ class DoordashApiClient {
           "dropoff_contact_given_name": dropoffContactGivenName,
           "dropoff_contact_send_notifications": true,
           "contactless_dropoff": false,
-          "order_value": orderValue * 100,
+          "order_value": orderValue,
           "action_if_undeliverable": "return_to_pickup",
           "order_contains": {
             "alcohol": false,

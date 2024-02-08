@@ -129,6 +129,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   Future<void> updateOrderAcceptedStatusFun(
     int orderAccepted,
   ) async {
+    print('Callllllled');
     try {
       setState(() {
         _isMainLoading = true;

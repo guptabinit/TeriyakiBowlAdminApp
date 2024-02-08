@@ -40,12 +40,14 @@ class _NewOrderCardState extends State<NewOrderCard> {
       });
 
       if (widget.snap['is_pickup'] == false) {
-        final quote = widget.snap['quote'];
-        final selectedItems = (widget.snap['selected_items'] as List)
-            .map((e) => Item.fromJson(e))
-            .toList();
+        print('data');
 
         try {
+          final quote = widget.snap['quote'];
+          final selectedItems = (widget.snap['selected_items'] as List)
+              .map((e) => Item.fromJson(e))
+              .toList();
+
           final res = await DoordashApiClient().createDelivery(
             pickupAddress: '${quote['pickup_address']}',
             pickupBusinessName: '${quote['pickup_business_name']}',
