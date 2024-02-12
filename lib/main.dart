@@ -113,6 +113,7 @@ Future<void> initializeService(
     'recent orders Service',
     description: 'Service for recent orders',
     importance: Importance.high,
+    sound: RawResourceAndroidNotificationSound('bing'),
   );
 
   if (Platform.isIOS || Platform.isAndroid) {
