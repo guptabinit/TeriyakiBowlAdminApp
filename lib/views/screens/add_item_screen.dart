@@ -52,6 +52,8 @@ class _AddItemScreenState extends State<AddItemScreen> {
   var isQuantityAvailable = false;
   late List<Quantity?> quantities;
 
+  List<String> categories = [];
+
   @override
   void initState() {
     varients = [];
@@ -64,6 +66,8 @@ class _AddItemScreenState extends State<AddItemScreen> {
     subCategoryController = TextEditingController();
     prepTimeController = TextEditingController();
     // totalOrderController = TextEditingController();
+
+    _fetchCategories();
 
     super.initState();
   }
@@ -227,6 +231,34 @@ class _AddItemScreenState extends State<AddItemScreen> {
     }
   }
 
+  Future<void> _fetchCategories() async {
+    try {
+      final results = await FirebaseFirestore.instance
+          .collection(
+            'categories',
+          )
+          .orderBy(
+            'category',
+            descending: false,
+          )
+          .get();
+      categories = results.docs
+          .map(
+            (e) =>
+                Category.fromJson(
+                  e.data(),
+                ).name ??
+                '',
+          )
+          .where((element) => element != 'ALL ITEMS')
+          .toList();
+    } catch (_) {
+      await _fetchCategories();
+    } finally {
+      setState(() {});
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -334,16 +366,14 @@ class _AddItemScreenState extends State<AddItemScreen> {
               6.heightBox,
               DropdownButton(
                 isExpanded: true,
-                value: CategoryItems.values
-                        .map((e) => e.name)
-                        .contains(subCategoryController.text)
+                value: categories.contains(subCategoryController.text)
                     ? subCategoryController.text
                     : null,
-                items: CategoryItems.values
+                items: categories
                     .map(
                       (e) => DropdownMenuItem(
-                        value: e.name,
-                        child: Text(e.name),
+                        value: e,
+                        child: Text(e),
                       ),
                     )
                     .toList(),
