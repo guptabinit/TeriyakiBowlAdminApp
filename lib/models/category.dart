@@ -1,4 +1,9 @@
-enum Category {
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'category.freezed.dart';
+part 'category.g.dart';
+
+enum CategoryItems {
   teriyaki('TERIYAKI'),
   bento('BENTO'),
   signatureRoll('SIGNATURE ROLLS'),
@@ -9,5 +14,17 @@ enum Category {
 
   final String name;
 
-  const Category(this.name);
+  const CategoryItems(this.name);
+}
+
+@freezed
+class Category with _$Category {
+  const factory Category({
+    String? name,
+    int? category,
+    String? thumbnail,
+  }) = _Category;
+
+  factory Category.fromJson(Map<String, dynamic> json) =>
+      _$CategoryFromJson(json);
 }

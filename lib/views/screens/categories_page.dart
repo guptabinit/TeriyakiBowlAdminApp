@@ -1,7 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:teriyaki_bowl_admin_app/models/category.dart';
 import 'package:teriyaki_bowl_admin_app/views/screens/add_item_screen.dart';
 import 'package:teriyaki_bowl_admin_app/views/screens/product_page.dart';
 import 'package:velocity_x/velocity_x.dart';
@@ -123,114 +125,81 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
         child: Column(
           children: [
             8.heightBox,
-            GridView(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 12,
-                childAspectRatio: 1 / 1.32,
-                mainAxisSpacing: 12,
-              ),
-              padding: const EdgeInsets.all(12),
-              children: [
-                gridCard(
-                  imgUrl:
-                      "https://firebasestorage.googleapis.com/v0/b/teriyaki-bowl-app.appspot.com/o/category%2FSalmon%20%26%20Shrimp%20teriyaki.jpeg?alt=media&token=aef5a4c4-f70a-4ff0-9850-4d22522b3d3d",
-                  onTap: () {
-                    Get.to(
-                      () => const ProductsPage(
-                        category: 0,
-                        categoryName: "ALL ITEMS",
-                      ),
+            StreamBuilder(
+              stream: _fetchCategories(),
+              builder: (context, snapshot) {
+                switch (snapshot.connectionState) {
+                  case ConnectionState.none:
+                  case ConnectionState.waiting:
+                    return const Center(
+                      child: CircularProgressIndicator(),
                     );
-                  },
-                  title: "ALL ITEMS",
-                ),
-                gridCard(
-                  imgUrl:
-                      "https://firebasestorage.googleapis.com/v0/b/teriyaki-bowl-app.appspot.com/o/category%2Fchicken%20%26%20beef%20teriyaki.jpeg?alt=media&token=8dd9cd0f-de99-48a5-921e-94359e69b65c",
-                  onTap: () {
-                    Get.to(
-                      () => const ProductsPage(
-                        category: 1,
-                        categoryName: "TERIYAKI",
+                  case ConnectionState.active:
+                  case ConnectionState.done:
+                    if (snapshot.hasError) {
+                      return const Center(
+                        child: Text(
+                          "Error",
+                          style: TextStyle(color: Colors.red),
+                        ),
+                      );
+                    }
+                    return GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 12,
+                        childAspectRatio: 1 / 1.32,
+                        mainAxisSpacing: 12,
                       ),
+                      padding: const EdgeInsets.all(12),
+                      itemCount: snapshot.data?.length ?? 0,
+                      itemBuilder: (context, index) {
+                        final category = snapshot.data?.elementAt(index);
+                        return gridCard(
+                          imgUrl: '${category?.thumbnail}',
+                          onTap: () {
+                            Get.to(
+                              () => ProductsPage(
+                                category: category?.category ?? 0,
+                                categoryName: "${category?.name}",
+                              ),
+                            );
+                          },
+                          title: "${category?.name}",
+                        );
+                      },
                     );
-                  },
-                  title: "TERIYAKI",
-                ),
-                gridCard(
-                  imgUrl:
-                      "https://firebasestorage.googleapis.com/v0/b/teriyaki-bowl-app.appspot.com/o/category%2FBeef%20bento.jpeg?alt=media&token=b5041d64-6ab9-480e-a998-6a7e6093e433",
-                  onTap: () {
-                    Get.to(
-                      () => const ProductsPage(
-                        category: 2,
-                        categoryName: "BENTO",
-                      ),
-                    );
-                  },
-                  title: "BENTO",
-                ),
-                gridCard(
-                  imgUrl:
-                      "https://firebasestorage.googleapis.com/v0/b/teriyaki-bowl-app.appspot.com/o/category%2FPink%20Panther.jpeg?alt=media&token=d66c5365-48cc-4dc0-aa1c-35c838c7f6aa",
-                  onTap: () {
-                    Get.to(
-                      () => const ProductsPage(
-                        category: 3,
-                        categoryName: "SIGNATURE ROLL",
-                      ),
-                    );
-                  },
-                  title: "SIGNATURE ROLL",
-                ),
-                gridCard(
-                  imgUrl:
-                      "https://firebasestorage.googleapis.com/v0/b/teriyaki-bowl-app.appspot.com/o/category%2FEel%20Roll2.jpeg?alt=media&token=53000bd4-8908-4969-b97b-25bee9e54cd8",
-                  onTap: () {
-                    Get.to(
-                      () => const ProductsPage(
-                        category: 4,
-                        categoryName: "SUSHI ROLL",
-                      ),
-                    );
-                  },
-                  title: "SUSHI ROLL",
-                ),
-                gridCard(
-                  imgUrl:
-                      "https://firebasestorage.googleapis.com/v0/b/teriyaki-bowl-app.appspot.com/o/category%2FTempura%20Shrimp%202.jpeg?alt=media&token=ce903215-b7c6-48a5-a550-d48c265b3a36",
-                  onTap: () {
-                    Get.to(
-                      () => const ProductsPage(
-                        category: 5,
-                        categoryName: "SIDES & SALADS",
-                      ),
-                    );
-                  },
-                  title: "SIDES & SALADS",
-                ),
-                gridCard(
-                  imgUrl:
-                      "https://firebasestorage.googleapis.com/v0/b/teriyaki-bowl-app.appspot.com/o/category%2FLemonade.png?alt=media&token=96d47d69-b8a0-4a47-9223-9bc97f43ca48",
-                  onTap: () {
-                    Get.to(
-                      () => const ProductsPage(
-                        category: 6,
-                        categoryName: "BEVERAGES",
-                      ),
-                    );
-                  },
-                  title: "BEVERAGES",
-                ),
-              ],
+                }
+              },
             ),
             62.heightBox,
           ],
         ),
       ),
     );
+  }
+
+  Stream<List<Category>> _fetchCategories() {
+    return FirebaseFirestore.instance
+        .collection(
+          'categories',
+        )
+        .orderBy(
+          'category',
+          descending: false,
+        )
+        .snapshots()
+        .map(
+          (snapshots) => snapshots.docs
+              .map(
+                (e) => Category.fromJson(
+                  e.data(),
+                ),
+              )
+              .toList(),
+        );
   }
 }
