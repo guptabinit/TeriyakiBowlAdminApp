@@ -38,13 +38,13 @@ class StarIO10 {
 
   static Future<void> print({
     required StarPrinter printer,
-    required Map<String, dynamic> printingData,
+    required String printingData,
     required PrintFailedCallback onFailed,
   }) async {
     try {
       Map<String, dynamic> arguments = {
         ...printer.asMap(),
-        ...printingData,
+        'printing_data': printingData,
       };
       return await _channel.invokeMethod('print', arguments);
     } on PlatformException catch (e) {

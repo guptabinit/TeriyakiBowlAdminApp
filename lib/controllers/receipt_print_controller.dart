@@ -90,32 +90,23 @@ class ReceiptPrintController extends GetxController {
   static Future<void> onPrintReceipt(dynamic data) async {
     int totalLength = 42;
 
+    StringBuffer buffer = StringBuffer();
+
+    buffer.writeln('              Teriyaki Bowl               ');
+
+    String customerName = data['name'];
+    buffer.writeln('Customer Name: $customerName');
+
+    String time = _convertDateFormat(data['pickup_time']);
+    buffer.writeln('Pickup Time: $time');
+
+    String orderNumber = data['oid'];
+    buffer.writeln('Order Number: #$orderNumber');
+
     List<String> itemIds = List<String>.from(data['cart']['items']);
-    Map<String, dynamic> printingData = {
-      'customer_name': data['name'],
-      'pickup_time': _convertDateFormat(data['pickup_time']),
-      'order_number': '#${data['oid']}',
-      'total_items': '${itemIds.length} Items',
-    };
+    buffer.writeln('Total Items: ${itemIds.length} Items');
 
-    String subTotal = '\$${data['cart']['cart_amount'].toStringAsFixed(2)}';
-    printingData.putIfAbsent('sub_total', () {
-      int length = totalLength - (8 + subTotal.length);
-      return 'Subtotal${List.generate((length), (_) => ' ').join()}$subTotal';
-    });
-
-    String tax = '\$${data['tax_amount'].toStringAsFixed(2)}';
-    printingData.putIfAbsent('tax', () {
-      int length = totalLength - (3 + tax.length);
-      return 'Tax${List.generate((length), (_) => ' ').join()}$tax';
-    });
-    String total = '\$${data['order_total'].toStringAsFixed(2)}';
-    printingData.putIfAbsent('total', () {
-      int length = totalLength - (5 + total.length);
-      return 'Total${List.generate((length), (_) => ' ').join()}$total';
-    });
-
-    List<Map<String, dynamic>> items = [];
+    buffer.writeln(List.generate(totalLength, (index) => '-').join());
 
     for (String itemId in itemIds) {
       dynamic item = data['cart'][itemId];
@@ -127,16 +118,28 @@ class ReceiptPrintController extends GetxController {
 
       String? modifiers = item['selectedAddon'].join(', ');
 
-      items.add({
-        'item':
-            firstPart + List.generate((length), (_) => ' ').join() + secondPart,
-        'modifiers': (modifiers != null && modifiers.isNotEmpty)
-            ? '$modifiers\n------------------------------------------'
-            : '------------------------------------------\n',
-      });
+      buffer.writeln(
+          firstPart + List.generate((length), (_) => ' ').join() + secondPart);
+
+      if (modifiers != null && modifiers.isNotEmpty) {
+        buffer.writeln(modifiers);
+        buffer.writeln(List.generate(totalLength, (index) => '-').join());
+      } else {
+        buffer.writeln(List.generate(totalLength, (index) => '-').join());
+      }
     }
 
-    printingData.putIfAbsent('items', () => items);
+    String subTotal = '\$${data['cart']['cart_amount'].toStringAsFixed(2)}';
+    buffer.writeln(
+        'Subtotal${List.generate((totalLength - (8 + subTotal.length)), (_) => ' ').join()}$subTotal');
+
+    String tax = '\$${data['tax_amount'].toStringAsFixed(2)}';
+    buffer.writeln(
+        'Tax${List.generate((totalLength - (3 + tax.length)), (_) => ' ').join()}$tax');
+
+    String total = '\$${data['order_total'].toStringAsFixed(2)}';
+    buffer.writeln(
+        'Total${List.generate((totalLength - (5 + total.length)), (_) => ' ').join()}$total');
 
     StarPrinter? printer = ReceiptPrintController.starPrinter;
     if (printer == null) {
@@ -146,11 +149,12 @@ class ReceiptPrintController extends GetxController {
         snackPosition: SnackPosition.BOTTOM,
         margin: const EdgeInsets.all(16),
       );
+
       return;
     }
     return StarIO10.print(
       printer: printer,
-      printingData: printingData,
+      printingData: buffer.toString(),
       onFailed: (message) {
         Get.snackbar(
           'Error',

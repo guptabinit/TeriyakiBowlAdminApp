@@ -9,14 +9,21 @@ import com.starmicronics.stario10.starxpandcommand.DocumentBuilder
 import com.starmicronics.stario10.starxpandcommand.PrinterBuilder
 import com.starmicronics.stario10.starxpandcommand.StarXpandCommandBuilder
 import com.starmicronics.stario10.starxpandcommand.printer.ImageParameter
-import com.starmicronics.stario10.starxpandcommand.printer.InternationalCharacterType
 import io.flutter.plugin.common.MethodChannel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import android.content.Context
-import com.starmicronics.stario10.starxpandcommand.MagnificationParameter
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.Rect
+import android.graphics.Typeface
+import android.text.Layout
+import android.text.StaticLayout
+import android.text.TextPaint
 import com.starmicronics.stario10.starxpandcommand.printer.Alignment
 import com.starmicronics.stario10.starxpandcommand.printer.CutType
 import io.flutter.plugin.common.MethodCall
@@ -58,119 +65,22 @@ class PrintingFactory(
 
         scope.launch {
             try {
-                val builder = StarXpandCommandBuilder()
-
-                val printerBuilder = PrinterBuilder()
 
                 val logo = BitmapFactory.decodeResource(context.resources, R.drawable.ic_app_logo)
 
-                printerBuilder.styleAlignment(Alignment.Center)
-                    .actionPrintImage(ImageParameter(logo, 70))
+                val printingData = call.argument<String?>("printing_data") ?: ""
 
-                printerBuilder.styleInternationalCharacter(InternationalCharacterType.Usa)
-
-                printerBuilder.add(
-                    PrinterBuilder().styleAlignment(Alignment.Center).styleBold(true)
-                        .styleMagnification(MagnificationParameter(2, 2))
-                        .actionPrintText("\nTeriyaki Bowl")
-                )
-
-
-                printerBuilder.add(PrinterBuilder().actionPrintText("\n------------------------------------------"))
-
-                printerBuilder.add(
-                    PrinterBuilder().styleAlignment(Alignment.Left).actionPrintText("Customer Name")
-                )
-
-                val customerName = call.argument<String?>("customer_name")
-                if (customerName != null) {
-                    printerBuilder.add(
-                        PrinterBuilder().styleAlignment(Alignment.Left)
-                            .styleMagnification(MagnificationParameter(2, 2))
-                            .actionPrintText(customerName)
-                    )
-                }
-
-
-                printerBuilder.add(
-                    PrinterBuilder().styleAlignment(Alignment.Left).actionPrintText("Pickup Time")
-                )
-
-                val pickupTime = call.argument<String?>("pickup_time")
-                if (pickupTime != null) {
-                    printerBuilder.add(
-                        PrinterBuilder().styleAlignment(Alignment.Left)
-                            .styleMagnification(MagnificationParameter(2, 2))
-                            .actionPrintText(pickupTime)
-                    )
-                }
-
-                printerBuilder
-                    .add(
-                        PrinterBuilder().styleAlignment(Alignment.Left)
-                            .actionPrintText("Order Number")
-
-                    )
-
-                val orderNumber = call.argument<String?>("order_number")
-                if (orderNumber != null) {
-                    printerBuilder.add(
-                        PrinterBuilder().styleAlignment(Alignment.Left)
-                            .styleMagnification(MagnificationParameter(2, 2))
-                            .actionPrintText(orderNumber)
-                    )
-                }
-
-                printerBuilder.add(
-                    PrinterBuilder().styleAlignment(Alignment.Left).actionPrintText("Total Items")
-                )
-
-                val totalItems = call.argument<String?>("total_items")
-                if (totalItems != null) {
-                    printerBuilder.add(
-                        PrinterBuilder().styleAlignment(Alignment.Left)
-                            .styleMagnification(MagnificationParameter(2, 2))
-                            .actionPrintText(totalItems)
-                    )
-                }
-
-                printerBuilder.add(PrinterBuilder().actionPrintText("------------------------------------------"))
-
-                val items = call.argument<List<Map<String, Any>>?>("items") ?: listOf()
-                for (item in items) {
-
-                    val itemV = item["item"] as? String
-                    if (itemV != null) {
-                        printerBuilder.add(
-                            PrinterBuilder().styleBold(true).styleAlignment(Alignment.Left)
-                                .actionPrintText(itemV)
+                val builder = StarXpandCommandBuilder()
+                builder.addDocument(
+                    DocumentBuilder()
+                        .addPrinter(
+                            PrinterBuilder()
+                                .styleAlignment(Alignment.Center)
+                                .actionPrintImage(ImageParameter(logo, 70))
+                                .actionPrintImage(createImageParameterFromText(printingData, 20))
+                                .actionCut(CutType.Partial)
                         )
-                    }
-
-                    val modifiers = item["modifiers"] as? String
-                    if (modifiers != null) {
-                        printerBuilder.add(
-                            PrinterBuilder().styleBold(false).styleAlignment(Alignment.Left)
-                                .actionPrintText(modifiers)
-                        )
-                    }
-                }
-                val subTotal = call.argument<String?>("sub_total")
-                val tax = call.argument<String?>("tax")
-
-                if (subTotal != null && tax != null) {
-                    printerBuilder.add(
-                        PrinterBuilder().actionPrintText(subTotal).actionPrintText(tax)
-                    )
-                }
-
-                val total = call.argument<String?>("total")
-                if (total != null) {
-                    printerBuilder.add(PrinterBuilder().styleBold(true).actionPrintText(total))
-                }
-                printerBuilder.actionCut(CutType.Partial)
-
-                builder.addDocument(DocumentBuilder().addPrinter(printerBuilder))
+                )
 
                 val commands = builder.getCommands()
 
@@ -188,6 +98,44 @@ class PrintingFactory(
                 printer.closeAsync().await()
             }
         }
+    }
+
+    private fun createImageParameterFromText(text: String, fontSize: Int): ImageParameter {
+        val width = 560
+        val typeface = Typeface.create(Typeface.MONOSPACE, Typeface.NORMAL)
+        val bitmap = createBitmapFromText(text, fontSize, width, typeface);
+        return ImageParameter(bitmap, width)
+    }
+
+    private fun createBitmapFromText(
+        text: String, textSize: Int, width: Int, typeface: Typeface?,
+    ): Bitmap {
+        val paint = Paint()
+        val bitmap: Bitmap
+        paint.textSize = textSize.toFloat()
+        paint.typeface = typeface
+        paint.getTextBounds(text, 0, text.length, Rect())
+        val textPaint = TextPaint(paint)
+        val builder = StaticLayout.Builder.obtain(text, 0, text.length, textPaint, width)
+            .setAlignment(Layout.Alignment.ALIGN_NORMAL)
+            .setLineSpacing(0f, 1f)
+            .setIncludePad(false)
+
+        val staticLayout = builder.build()
+
+        // Create bitmap
+        bitmap = Bitmap.createBitmap(
+            staticLayout.width,
+            staticLayout.height,
+            Bitmap.Config.ARGB_8888
+        )
+
+        // Create canvas
+        val canvas: Canvas = Canvas(bitmap)
+        canvas.drawColor(Color.WHITE)
+        canvas.translate(0f, 0f)
+        staticLayout.draw(canvas)
+        return bitmap
     }
 
 }
