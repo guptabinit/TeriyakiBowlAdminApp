@@ -103,6 +103,9 @@ class ReceiptPrintController extends GetxController {
     String orderNumber = data['oid'];
     buffer.writeln('Order Number: #$orderNumber');
 
+    String paymentMode = data['is_cod'] ? 'Cash' : 'Credit';
+    buffer.writeln('Payment Mode: $paymentMode');
+
     List<String> itemIds = List<String>.from(data['cart']['items']);
     buffer.writeln('Total Items: ${itemIds.length} Items');
 
@@ -118,11 +121,18 @@ class ReceiptPrintController extends GetxController {
 
       String? modifiers = item['selectedAddon'].join(', ');
 
+      String? specialInstruction =
+          item['specialInstruction'] == '' ? null : item['specialInstruction'];
+
       buffer.writeln(
           firstPart + List.generate((length), (_) => ' ').join() + secondPart);
 
       if (modifiers != null && modifiers.isNotEmpty) {
         buffer.writeln(modifiers);
+      }
+
+      if (specialInstruction != null) {
+        buffer.writeln('Sp. Instruction: $specialInstruction');
         buffer.writeln(List.generate(totalLength, (index) => '-').join());
       } else {
         buffer.writeln(List.generate(totalLength, (index) => '-').join());
@@ -140,6 +150,8 @@ class ReceiptPrintController extends GetxController {
     String total = '\$${data['order_total'].toStringAsFixed(2)}';
     buffer.writeln(
         'Total${List.generate((totalLength - (5 + total.length)), (_) => ' ').join()}$total');
+
+    buffer.toString().log();
 
     StarPrinter? printer = ReceiptPrintController.starPrinter;
     if (printer == null) {
