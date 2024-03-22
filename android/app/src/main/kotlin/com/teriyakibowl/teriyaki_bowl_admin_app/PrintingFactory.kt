@@ -68,7 +68,9 @@ class PrintingFactory(
 
                 val logo = BitmapFactory.decodeResource(context.resources, R.drawable.ic_app_logo)
 
-                val printingData = call.argument<String?>("printing_data") ?: ""
+                val headerPrintingData = call.argument<String?>("header_printing_data") ?: ""
+                val bodyPrintingData = call.argument<String?>("body_printing_data") ?: ""
+                val footerPrintingData = call.argument<String?>("footer_printing_data") ?: ""
 
                 val builder = StarXpandCommandBuilder()
                 builder.addDocument(
@@ -77,7 +79,24 @@ class PrintingFactory(
                             PrinterBuilder()
                                 .styleAlignment(Alignment.Center)
                                 .actionPrintImage(ImageParameter(logo, 70))
-                                .actionPrintImage(createImageParameterFromText(printingData, 20))
+                                .actionPrintImage(
+                                    createImageParameterFromText(
+                                        headerPrintingData,
+                                        20
+                                    )
+                                )
+                                .actionPrintImage(
+                                    createImageParameterFromText(
+                                        bodyPrintingData,
+                                        20
+                                    )
+                                )
+                                .actionPrintImage(
+                                    createImageParameterFromText(
+                                        footerPrintingData,
+                                        20
+                                    )
+                                )
                                 .actionCut(CutType.Partial)
                         )
                 )

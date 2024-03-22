@@ -90,26 +90,28 @@ class ReceiptPrintController extends GetxController {
   static Future<void> onPrintReceipt(dynamic data) async {
     int totalLength = 42;
 
-    StringBuffer buffer = StringBuffer();
+    final headerBuffer = StringBuffer();
+    final bodyBuffer = StringBuffer();
+    final footerBuffer = StringBuffer();
 
-    buffer.writeln('              Teriyaki Bowl               ');
+    headerBuffer.writeln('              Teriyaki Bowl               ');
 
     String customerName = data['name'];
-    buffer.writeln('Customer Name: $customerName');
+    headerBuffer.writeln('Customer Name: $customerName');
 
     String time = _convertDateFormat(data['pickup_time']);
-    buffer.writeln('Pickup Time: $time');
+    headerBuffer.writeln('Pickup Time: $time');
 
     String orderNumber = data['oid'];
-    buffer.writeln('Order Number: #$orderNumber');
+    bodyBuffer.writeln('Order Number: #$orderNumber');
 
     String paymentMode = data['is_cod'] ? 'Cash' : 'Credit';
-    buffer.writeln('Payment Mode: $paymentMode');
+    footerBuffer.writeln('Payment Mode: $paymentMode');
 
     List<String> itemIds = List<String>.from(data['cart']['items']);
-    buffer.writeln('Total Items: ${itemIds.length} Items');
+    footerBuffer.writeln('Total Items: ${itemIds.length} Items');
 
-    buffer.writeln(List.generate(totalLength, (index) => '-').join());
+    footerBuffer.writeln(List.generate(totalLength, (index) => '-').join());
 
     for (String itemId in itemIds) {
       dynamic item = data['cart'][itemId];
@@ -124,34 +126,34 @@ class ReceiptPrintController extends GetxController {
       String? specialInstruction =
           item['specialInstruction'] == '' ? null : item['specialInstruction'];
 
-      buffer.writeln(
+      footerBuffer.writeln(
           firstPart + List.generate((length), (_) => ' ').join() + secondPart);
 
       if (modifiers != null && modifiers.isNotEmpty) {
-        buffer.writeln(modifiers);
+        footerBuffer.writeln(modifiers);
       }
 
       if (specialInstruction != null) {
-        buffer.writeln('Sp. Instruction: $specialInstruction');
-        buffer.writeln(List.generate(totalLength, (index) => '-').join());
+        footerBuffer.writeln('Sp. Instruction: $specialInstruction');
+        footerBuffer.writeln(List.generate(totalLength, (index) => '-').join());
       } else {
-        buffer.writeln(List.generate(totalLength, (index) => '-').join());
+        footerBuffer.writeln(List.generate(totalLength, (index) => '-').join());
       }
     }
 
     String subTotal = '\$${data['cart']['cart_amount'].toStringAsFixed(2)}';
-    buffer.writeln(
+    footerBuffer.writeln(
         'Subtotal${List.generate((totalLength - (8 + subTotal.length)), (_) => ' ').join()}$subTotal');
 
     String tax = '\$${data['tax_amount'].toStringAsFixed(2)}';
-    buffer.writeln(
+    footerBuffer.writeln(
         'Tax${List.generate((totalLength - (3 + tax.length)), (_) => ' ').join()}$tax');
 
     String total = '\$${data['order_total'].toStringAsFixed(2)}';
-    buffer.writeln(
+    footerBuffer.writeln(
         'Total${List.generate((totalLength - (5 + total.length)), (_) => ' ').join()}$total');
 
-    buffer.toString().log();
+    footerBuffer.toString().log();
 
     StarPrinter? printer = ReceiptPrintController.starPrinter;
     if (printer == null) {
@@ -166,7 +168,9 @@ class ReceiptPrintController extends GetxController {
     }
     return StarIO10.print(
       printer: printer,
-      printingData: buffer.toString(),
+      headerPrintingData: headerBuffer.toString(),
+      bodyPrintingData: bodyBuffer.toString(),
+      footerPrintingData: footerBuffer.toString(),
       onFailed: (message) {
         Get.snackbar(
           'Error',
